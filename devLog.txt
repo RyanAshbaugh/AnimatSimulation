@@ -1,0 +1,20 @@
+#self.parameters = [1,15,20]             #[animNum,foodNum,worldSize]
+#self.animatParams = [["Wheel Animat",(1,0),10,[80,.02,.25,-65,2],[320,.02,.2,-65,8]]]
+
+
+
+     TO DO
+----------------
+ -Fix loc variable in shadow varaible creation in networkModule
+ -Time simParam version vs old version
+ -Get rid of gnumpy stuff
+ -fix deleteAnimat in developmentWindow   (implement anim id in world first)
+ -fix loadEvo in developmentWindow   (implement in evoDriver first)
+
+
+    Does Not Work
+-------------------
+
+ -Delete Animat in develoment window 
+ -load evo results in dev window
+

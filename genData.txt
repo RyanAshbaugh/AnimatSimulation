@@ -1,0 +1,135 @@
+Animat Generation Results
+
+
+
+Results for Generation: 0
+>>Metric: FindsFood
+>>  Max Score: 0.0
+>>  Min Score: 0.0
+>>  Mean: 0.0
+>>  Standard Deviation: 0.0
+>>Metric: AvgMove
+>>  Max Score: 0.00855507928616
+>>  Min Score: 0.0
+>>  Mean: 21.4658186429
+>>  Standard Deviation: 53.7425743756
+
+Results for Generation: 1
+>>Metric: FindsFood
+>>  Max Score: 0.0
+>>  Min Score: 0.0
+>>  Mean: 0.0
+>>  Standard Deviation: 0.0
+>>Metric: AvgMove
+>>  Max Score: 0.008532916231
+>>  Min Score: 0.0
+>>  Mean: 22.6341249859
+>>  Standard Deviation: 57.4126157867
+
+Results for Generation: 2
+>>Metric: FindsFood
+>>  Max Score: 0.0
+>>  Min Score: 0.0
+>>  Mean: 0.0
+>>  Standard Deviation: 0.0
+>>Metric: AvgMove
+>>  Max Score: 0.00797735734433
+>>  Min Score: 0.0
+>>  Mean: 18.0537808201
+>>  Standard Deviation: 49.6157978832
+
+Results for Generation: 3
+>>Metric: FindsFood
+>>  Max Score: 0.0
+>>  Min Score: 0.0
+>>  Mean: 0.0
+>>  Standard Deviation: 0.0
+>>Metric: AvgMove
+>>  Max Score: 0.0100105196922
+>>  Min Score: 0.0
+>>  Mean: 25.0094865076
+>>  Standard Deviation: 66.9543136726
+
+Results for Generation: 4
+>>Metric: FindsFood
+>>  Max Score: 0.0
+>>  Min Score: 0.0
+>>  Mean: 0.0
+>>  Standard Deviation: 0.0
+>>Metric: AvgMove
+>>  Max Score: 0.0100438643906
+>>  Min Score: 0.0
+>>  Mean: 25.4153849841
+>>  Standard Deviation: 65.719222562
+
+Results for Generation: 5
+>>Metric: FindsFood
+>>  Max Score: 0.0
+>>  Min Score: 0.0
+>>  Mean: 0.0
+>>  Standard Deviation: 0.0
+>>Metric: AvgMove
+>>  Max Score: 0.0426302444358
+>>  Min Score: 0.0
+>>  Mean: 101.674216291
+>>  Standard Deviation: 276.045782243
+
+Results for Generation: 6
+>>Metric: FindsFood
+>>  Max Score: 0.0
+>>  Min Score: 0.0
+>>  Mean: 0.0
+>>  Standard Deviation: 0.0
+>>Metric: AvgMove
+>>  Max Score: 0.0729393756779
+>>  Min Score: 0.0
+>>  Mean: 164.726659573
+>>  Standard Deviation: 441.678894418
+
+Results for Generation: 7
+>>Metric: FindsFood
+>>  Max Score: 0.0
+>>  Min Score: 0.0
+>>  Mean: 0.0
+>>  Standard Deviation: 0.0
+>>Metric: AvgMove
+>>  Max Score: 0.0701830589414
+>>  Min Score: 0.0
+>>  Mean: 164.566477663
+>>  Standard Deviation: 428.29600118
+
+Results for Generation: 8
+>>Metric: FindsFood
+>>  Max Score: 0.0
+>>  Min Score: 0.0
+>>  Mean: 0.0
+>>  Standard Deviation: 0.0
+>>Metric: AvgMove
+>>  Max Score: 0.0409749145351
+>>  Min Score: 0.0
+>>  Mean: 88.359360834
+>>  Standard Deviation: 250.525095712
+
+Results for Generation: 9
+>>Metric: FindsFood
+>>  Max Score: 0.0
+>>  Min Score: 0.0
+>>  Mean: 0.0
+>>  Standard Deviation: 0.0
+>>Metric: AvgMove
+>>  Max Score: 0.0697383422253
+>>  Min Score: 0.0
+>>  Mean: 150.139235329
+>>  Standard Deviation: 401.416745336
+
+Results for Generation: 10
+>>Metric: FindsFood
+>>  Max Score: 0.0
+>>  Min Score: 0.0
+>>  Mean: 0.0
+>>  Standard Deviation: 0.0
+>>Metric: AvgMove
+>>  Max Score: 0.100572424364
+>>  Min Score: 0.0
+>>  Mean: 221.34381524
+>>  Standard Deviation: 590.240116853

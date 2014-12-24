@@ -1,0 +1,12 @@
+<number of animats>
+<number of worlds>
+~~Repeat following for each world~~~~
+<animNum -> integer>
+<foodNum -> integer>
+<worldSize -> integer>
+~~Repeat following for each animat~~~
+<animat type -> string>
+<origin x -> integer> <origin y -> integer>
+<Energy -> integer>
+<number of inhibitory neurons -> integer> <a -> float> <b -> float> <c -> float> <d -> float>
+<number of excitatory neurons -> integer> <a -> float> <b -> float> <c -> float> <d -> float>
