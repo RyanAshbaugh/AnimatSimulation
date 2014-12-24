@@ -37,7 +37,7 @@ class Food(Stimulus):
     #  loc : takes (x,y) coordinate for starting position
     #  smell : sets smell potency? not sure if this is needed yet, just putting here
     #  amount : initial "amount" of food
-    def __init__(self, loc = (0,0), smell = 1.0, amount = 5.0):
+    def __init__(self, loc = (0,0), smell = 1.0, amount = 10.0):
         Stimulus.__init__(self,startPos = loc, potency = smell)
         self.amt = amount
         

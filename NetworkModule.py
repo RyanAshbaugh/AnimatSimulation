@@ -28,7 +28,7 @@ class Network:
          self.numMotor = 0
          self.numSensory = 0
          self.totalNum = 0
-         self.inhibParams = inhib  #3 b/c passed all parameters, not just network realted ones
+         self.inhibParams = inhib
          self.excitParams = excit
          self.imported = False
 
@@ -229,12 +229,12 @@ class Network:
          #for every neuron in the "grid"
          for index1 in (np.hstack((self.excitatoryNeurons,self.inhibitoryNeurons))):
             #if edge neuron, connect to appropriate motor
-            if (self._neurons[index1].X==-0.45): self.connectNeurons(index1,self.motorNeurons[0],10)
-            if (self._neurons[index1].X==0.45): self.connectNeurons(index1,self.motorNeurons[1],10)
+            if (self._neurons[index1].X==-0.45): self.connectNeurons(index1,self.motorNeurons[0],20)
+            if (self._neurons[index1].X==0.45): self.connectNeurons(index1,self.motorNeurons[1],20)
             #if top neuron, connect each sense neuron to it
             if (self._neurons[index1].Y==0.45):
                 for sense in self.senseNeurons:
-                    self.connectNeurons(sense,index1,10)
+                    self.connectNeurons(sense,index1,30)
             for index2 in (np.hstack((self.excitatoryNeurons,self.inhibitoryNeurons))):
                 #str_ = 5
                 if (index1 != index2):
@@ -249,7 +249,7 @@ class Network:
                     if(random.random() < p):
                         #print str(type(n1)) + " @(" + str(n1.X) + "," + str(n1.Y) + ") ---> " + str(type(n2)) +\
                         #      " @(" + str(n2.X) + "," + str(n2.Y) + ")"
-                        self.connectNeurons(index1, index2, 5)
+                        self.connectNeurons(index1, index2, 10)
 
 
      def populateTestNetwork(self):
@@ -311,7 +311,7 @@ class Network:
          state.append(self.d.copy())
          state.append(self.u.copy())
          state.append(self.v.copy())
-         #state.append(self.S.copy())
+         state.append(self.S.copy())
          return state
 
      def loadDynamicState(self, state):
@@ -321,7 +321,7 @@ class Network:
          self.d = state[3]
          self.u = state[4]
          self.v = state[5]
-         #self.S = state[6]
+         self.S = state[6]
 
      def connectTestNetwork(self):
 

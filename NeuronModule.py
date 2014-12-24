@@ -1,5 +1,5 @@
 from SynapseModule import Synapse as Synapse
-import Network_nogpu
+import NetworkModule
 import math
 import random
 import array
@@ -82,7 +82,11 @@ class Neuron(object):
 
 
     def isFiring(self):
-        return self.membranePotential >= self.FIRED_VALUE
+        try:
+            return self.membranePotential >= self.FIRED_VALUE
+        except RuntimeWarning:
+            print self.membranePotential
+            return False
 
     def fire(self):
         self.u=self.u + self.d

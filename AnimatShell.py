@@ -12,7 +12,7 @@ from numpy import *
 import math as math
 import scipy.spatial
 import time
-import Network_nogpu
+import NetworkModule
 import SimParam
 
 
@@ -26,7 +26,7 @@ class Animat():
     #  startPos : takes (x,y) coordinate for starting position
     def __init__(self,(id,type,origin,cal,inhib,excit,aa,bb)):
 
-        self.net = Network_nogpu.Network(inhib,excit,aa,bb)
+        self.net = NetworkModule.Network(inhib,excit,aa,bb)
         self.net.generateNeurons()
         #self.net.populateTestNetwork()
         self.net.connectNetwork()
@@ -35,7 +35,7 @@ class Animat():
         self.id = id
         self.direc = np.pi/2.0
         self.Eating = False #does not start eating
-        self.Energy = 1000
+        self.Energy = 200
         self.maxInputStrength = np.ones(self.net.totalNum)*200.
         #self.image = pygame.image.load("roomba.png").convert_alpha()
     
@@ -106,20 +106,17 @@ class WheelAnimat(Animat):
             trac = 0
 
         # rotate body depending on the difference (hopefully small) of two motors along direction of travel
-
         self.direc = self.direc + math.atan(trac*(self.motors[1]-self.motors[0])/self.radius)
-
         self.unwind() #the angle direc could exceed 2*pi and 'wind up'
         self.determineMotion(trac)
 
-        #add this!!
         self.Energy = self.Energy - self.cMotionEnergy * self.motors.sum(axis=0) - self.kBasalEnergy
 
     def smell(self, smells):
         smell_type = smells[0]
 
         smell_loc = smells[1][0]    #smell locations
-        smell_str = smells[1][1]    #smell strengths
+        smell_str = smells[1][1] * 10   #smell strengths
 
         dir = -(self.direc - math.pi/2)   #figure out the clockwise direction of the animat
         if(dir <= 0): dir += math.pi*2    #bound direction to [0, 2*pi]
@@ -129,13 +126,13 @@ class WheelAnimat(Animat):
 
         #built-in!
         total_smell = self.net.sensitivity* np.sum(  self.gaussian(scipy.spatial.distance.cdist(worldPos, smell_loc ), 0, 3) *smell_str, axis=1)  #figures out the total smell strength based on the distances (gaussian distribution)
-
         self.net.I = 2*np.ones( (self.net.totalNum), dtype = np.float32 )       #sets I to be zero for all neurons
+
         self.net.I[self.net.senseNeurons] = np.minimum(total_smell,200)   #sense neuron drive based on smell
 
 
     def gaussian(self, x, mu, sig):
-         return np.exp(-1 * (x - mu**2.) / 2 * sig**2.)
+         return np.exp(-1 * (x - mu)**2. / 2 * sig**2.)
 
     # direction and traction determine motion
     def unwind(self):
@@ -159,14 +156,15 @@ class WheelAnimat(Animat):
         #print(food_amt)
         #print(food_dist[0])
         #self.foodDist = np.sqrt(((np.tile( self.pos, [1, self.foodPos.shape(1)]) - self.foodPos )**2).sum(axis=0)
-        whichFoods = np.logical_and(food_dist[0] < 1, food_amt >= 0).nonzero()[0]
+        whichFoods = np.logical_and(food_dist[0] < .5, food_amt > 0).nonzero()[0]
 
         #print(whichFoods.size)
         if whichFoods.size > 0:
+            print np.logical_and(food_dist[0] < .5, food_amt > 0).nonzero()
             #print foods[1]
             self.Eating = 1
             food_amt[whichFoods] -= 1.0
-            #objs[whichFoods].amt -= 1.0
+            objs[whichFoods].amt -= 1.0
             #print food_amt
             try:
                 self.Energy += self.Calories * food_amt[whichFoods]
