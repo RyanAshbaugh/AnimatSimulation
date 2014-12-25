@@ -115,8 +115,8 @@ class WheelAnimat(Animat):
     def smell(self, smells):
         smell_type = smells[0]
 
-        smell_loc = smells[1][0]    #smell locations
-        smell_str = smells[1][1] * 10   #smell strengths
+        smell_loc = smells[1][0]        #smell locations
+        smell_str = smells[1][1] * 100   #smell strengths
 
         dir = -(self.direc - math.pi/2)   #figure out the clockwise direction of the animat
         if(dir <= 0): dir += math.pi*2    #bound direction to [0, 2*pi]
@@ -147,7 +147,7 @@ class WheelAnimat(Animat):
         self.pos = self.pos + self.posInc
         
     # 'Eat' if at food    
-    def eat(self, foods, objs):
+    def eat(self, foods):
         type = foods[0]
         food_loc = foods[1][0]
         food_amt = foods[1][1]
@@ -160,16 +160,21 @@ class WheelAnimat(Animat):
 
         #print(whichFoods.size)
         if whichFoods.size > 0:
+            print "which foods size", whichFoods.size
+            print "food dist", food_dist
             print np.logical_and(food_dist[0] < .5, food_amt > 0).nonzero()
             #print foods[1]
             self.Eating = 1
-            food_amt[whichFoods] -= 1.0
-            objs[whichFoods].amt -= 1.0
             #print food_amt
             try:
                 self.Energy += self.Calories * food_amt[whichFoods]
             except ValueError:
+                print "Eat error"
                 self.Energy += self.Calories * food_amt[whichFoods][0]
+            food_amt[whichFoods] -= 1.0
+            print food_amt[whichFoods]
+
+
 #            if self.foodAmts[self.whichFood] < 0: # eliminate food that's gone from the world data structure
 #                self.net.nn = (self.foodAmts > 0).nonzero()
 #                self.foodAmts = self.foodAmts[self.net.getNN()]
@@ -177,8 +182,9 @@ class WheelAnimat(Animat):
 #        if math.minimum(self.foodDist) > 0.1:
         else:
             self.Eating = 0 #move if not near food
+        return food_amt
 
-        #print('self.Eating : ' + str(self.Eating))
+
 
             
     def getStats(self):

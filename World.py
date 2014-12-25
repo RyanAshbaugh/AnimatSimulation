@@ -31,7 +31,7 @@ class World:
         self.smells = []
         self.foods = []
         foodArray = self.setup_food()
-        self.smells.append(("Type 1", foodArray))
+        self.smells.append(["Type 1", foodArray])
 
     def setup_food(self):
         food_loc = []
@@ -46,7 +46,7 @@ class World:
 
         food_loc = np.vstack(food_loc)
         food_str = np.hstack(food_str)
-        return (food_loc, food_str)
+        return [food_loc, food_str]
 
     def determineTraction(self,pos):
         pass
@@ -74,29 +74,21 @@ class World:
 
     def update(self, t, dt):
         for foodArray in self.smells:
-            #foodArray = (foodArray[0],self.updateFood(foodArray))
             for animat in self.animats:
                 animat.smell(foodArray)
-                try:
-                    animat.runNetwork(t, dt)
-                except RuntimeWarning:
-                    print "RuntimeWarning in runNetwork"
+                animat.runNetwork(t, dt)
                 traction = self.determineTraction(animat.pos)
-                #animat.eat(foodArray)
                 animat.move(traction, t)
-                animat.eat(foodArray,self.foods)
+                foodArray[1][1] = animat.eat(foodArray) #returns array with updated food amounts
+                self.updateFood(foodArray[1][1])        #updates food objects
+
+
 
     #get rid of foods that are eaten
-    def updateFood(self,foods):
-        notEaten = []
-        for i in xrange(len(self.foods)):
-            if self.foods[i].amt > 0:
-                notEaten.append(i)
-        amts = foods[1][1][notEaten]
-        locs = foods[1][0][notEaten]
-        food_loc = np.vstack(locs)
-        food_str = np.hstack(amts)
-        return (locs, amts)
+    def updateFood(self,amts):
+        for amt,food in zip(amts,self.foods):
+            food.amt = amt
+
 
     def getFoodLocs(self):
         return [food.getPos() for food in self.foods]
