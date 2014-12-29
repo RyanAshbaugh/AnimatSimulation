@@ -112,3 +112,28 @@ class DynamicWorldState:
 
     def getPos(self):
         return self.getAnimatState()[4]
+
+    def getA(self):
+        return self.getAnimatState()[7][0]
+
+    def getB(self):
+        return self.getAnimatState()[7][1]
+
+    def getC(self):
+        return self.getAnimatState()[7][2]
+
+    def getD(self):
+        return self.getAnimatState()[7][3]
+
+    def getU(self):
+        return self.getAnimatState()[7][4]
+
+    def getV(self):
+        return self.getAnimatState()[7][5]
+
+    def getS(self):
+        return self.getAnimatState()[7][6]
+
+    def getI(self):
+        return self.getAnimatState()[7][7]
+

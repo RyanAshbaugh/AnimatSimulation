@@ -116,6 +116,9 @@ class GUIDriver:
         trackmenu.invoke(3)
         self.menubar.add_cascade(label="Track", menu = trackmenu)
         self.root.config(menu=self.menubar)
+        viewMenu = tk.Menu(self.menubar, tearoff=0)
+        viewMenu.add_command(label="Internal Variables",command=self.varViewer)
+        self.menubar.add_cascade(label="View",menu=viewMenu)
 
         #initialize the graphs and video control bar
         self.worldGraph = Graph(self.root, [100, 50, 500, 475], [-10, 10, -10, 10])
@@ -509,6 +512,27 @@ class GUIDriver:
         title = tk.Label(win,text="Stats for Food 1",font="bold",relief="ridge",padx=5,pady=5)
         #placements
         title.place(x=300,y=20)
+
+    def varViewer(self,time):
+        win = tk.Toplevel(height=800,width=1100)
+        win.title("Internal Variable Viewer")
+
+        tBox = tk.Frame(win,height=500,width=700)
+        h = len(self.simHistory[0].getS())     #get S because has highest number of rows
+        w = len(self.simHistory[0].getA()) * 2 #get A because has highest number of columns
+        vScroll = tk.Scrollbar(tBox,orient="vertical")
+        hScroll = tk.Scrollbar(tBox,orient="horizontal")
+        disBox = tk.Text(tBox,xscrollcommand=hScroll.set,yscrollcommand=vScroll.set)
+        state = self.simHistory[time]
+        #disBox.insert("INSERT",)
+
+
+        #placements
+        tBox.place(x=100,y=100)
+        vScroll.pack(side="right",fill="y")
+        hScroll.pack(side="bottom",fill="x")
+        disBox.pack()
+
 
     def showDevWin(self):
         self.simEngine.stopSimulation()

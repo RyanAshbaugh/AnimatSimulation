@@ -76,7 +76,7 @@ class EvoClusterDriver():
 
     def initializeSims(self):
         for i,sP in enumerate(self.simParams):
-            self.sims.append(Simulation(self.id,i,sP,90000,writeInterval=100,evo=True))
+            self.sims.append(Simulation(self.id,i,sP,60000,writeInterval=25,evo=True))
 
     def startNode(self):
         print "Node " + str(self.id) + " starting"
@@ -94,7 +94,7 @@ class EvoClusterDriver():
 # Simulation object
 class Simulation():
 
-    def __init__(self,clusterId,simId,simParam,runTime,writeInterval=100,evo=False,writeFiles=True):
+    def __init__(self,clusterId,simId,simParam,runTime,writeInterval=25,evo=False,writeFiles=True):
         #print simParam.getAnimParams(1)
         #self.simEngine = SimulationEngine()     #handles control of world
         self.writeFiles = writeFiles
@@ -147,7 +147,7 @@ class Simulation():
             if s.getEnergy < (.5*initNrg):
                 newDist = self.minFoodDist(s)
                 if newDist < prevDist: score += np.abs(prevDist-newDist)
-                else: score -= np.abs(prevDist-newDist)
+                #else: score -= np.abs(prevDist-newDist)
                 prevDist = newDist
         return score
 

@@ -128,7 +128,7 @@ class WheelAnimat(Animat):
         total_smell = self.net.sensitivity* np.sum(  self.gaussian(scipy.spatial.distance.cdist(worldPos, smell_loc ), 0, 3) *smell_str, axis=1)  #figures out the total smell strength based on the distances (gaussian distribution)
         self.net.I = 2*np.ones( (self.net.totalNum), dtype = np.float32 )       #sets I to be zero for all neurons
 
-        self.net.I[self.net.senseNeurons] = np.minimum(total_smell,200)   #sense neuron drive based on smell
+        self.net.I[self.net.senseNeurons] = np.minimum(total_smell,100)   #sense neuron drive based on smell
 
 
     def gaussian(self, x, mu, sig):

@@ -97,10 +97,11 @@ class EvoDriver():
         genData = []
         scores = {}    #dictionary of scores with ids as keys
         for result in self.results:
-            print result
+            #print result
             scores[result[0]] = 0
         #calculate score based on each metric
         for metric in self.toTrack:
+            print metric
             #find distribution of results
             maxScore = max(self.results, key=lambda x: x[1][metric])[1][metric]
             minScore = min(self.results, key=lambda x: x[1][metric])[1][metric]
@@ -109,15 +110,17 @@ class EvoDriver():
                 try:
                     #avgMove needs dist of results to score, cannot be done solely in simulation object, unlike others
                     if metric == "AvgMove":
+                        print "int if avgMove"
                         medScore = (maxScore - minScore)/2.0
                         #compare to med score since dont want to move too little or too much
                         score = medScore/result[1][metric]
                         if math.isinf(score): score = 0         #moves too much or too little so 0
-                        print "avgMove score" ,score
+                        #print "avgMove score" ,score
                         scores[result[0]] += score
                     else:
-                        scores[result[0]] += (result[1][metric]/maxScore)
-                        print "else score", (result[1][metric]/maxScore)
+                        print "in else"
+                        scores[result[0]] += (result[1][metric])
+                        #print "else score", (result[1][metric])
                 except ZeroDivisionError:
                     pass #max is zero so will not affect score
                 except RuntimeWarning:
@@ -193,14 +196,14 @@ class EvoDriver():
         print "Simulation Complete\n"
         input = raw_input("Enter 1 to save or anything else to close: ")
         if input == "1":
-            fn = raw_input("Enter filename for animat data: ")
+            fn = raw_input("Enter filename for animat data to run in GUI: ")
             print "Saving top animat for use in GUI version"
             with open(fn+'.txt','w') as f:
                 json.dump(self.animats[-1].getAnimParams(1),f)
             print "Saving evolutionary algorithm stats"
             printScores = raw_input("Include scores in log file? (1 if yes): ")
             fn = raw_input("Enter filename for evo log file: ")
-            with open(fn+'.txt','w') as f:
+            with open(fn+'_detail.txt','w') as f:
                 f.write("Animat Generation Results\n\n")
                 for i,gen in enumerate(self.genData):
                     f.write("\n\nResults for Generation: " + str(i))
@@ -212,6 +215,12 @@ class EvoDriver():
                         f.write("\n>>  Standard Deviation: " + str(metric[4]))
                         if printScores == '1':
                             f.write("\n>>  Scores after ranking this metric:\n" + str(metric[5]))
+            with open(fn+'_simple.txt','w') as f:
+                f.write("Animat Generation Results - each grid is mean and SD of each metric in a generation\n\n")
+                for i,gen in enumerate(self.genData):
+                    f.write("\n" + str(i))
+                    for metric in gen: f.write("\n" + str(metric[3]) + " " + str(metric[4]))
+                    f.write("\n")
 
 
 

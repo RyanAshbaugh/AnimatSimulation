@@ -252,56 +252,6 @@ class Network:
                         self.connectNeurons(index1, index2, 10)
 
 
-     def populateTestNetwork(self):
-         n_e = self.excitParams[0]
-         n_i = self.inhibParams[0]   #first element is total num
-
-         #inhibitory neurons
-         for x in range(0, n_i):
-             #theta = random.random()*2.*np.pi
-             #r = random.random()
-             theta = 2*np.pi*random.random()
-             u = random.random()+random.random()
-             r = 2-u if u>1 else u
-             self.add_neuron("inhibitory", (r*np.cos(theta), r*np.sin(theta)))
-
-         #excitatory neurons
-         for x in range(0, n_e):
-             #theta = random.random()*2.*np.pi
-             #r = random.random()
-             theta = 2*np.pi*random.random()
-             u = random.random()+random.random()
-             r = 2-u if u>1 else u
-             self.add_neuron("excitatory", (r*np.cos(theta), r*np.sin(theta)))
-
-         #motor neurons
-         self.add_neuron("motor", (-1, 0))
-         self.add_neuron("motor", (1, 0))
-
-         #sensory neurons
-         self.add_neuron("sensory", (np.cos(7*np.pi/8.), np.sin(7*np.pi/8.)))
-         self.add_neuron("sensory", (np.cos(1*np.pi/8.), np.sin(1*np.pi/8.)))
-         self.add_neuron("sensory", (np.cos(6*np.pi/8.), np.sin(6*np.pi/8.)))
-         self.add_neuron("sensory", (np.cos(2*np.pi/8.), np.sin(2*np.pi/8.)))
-         self.add_neuron("sensory", (np.cos(5*np.pi/8.), np.sin(5*np.pi/8.)))
-         self.add_neuron("sensory", (np.cos(3*np.pi/8.), np.sin(3*np.pi/8.)))
-
-         self.add_neuron("sensory", (np.cos(7.5*np.pi/8.), np.sin(7.5*np.pi/8.)))
-         self.add_neuron("sensory", (np.cos(1.5*np.pi/8.), np.sin(1.5*np.pi/8.)))
-         self.add_neuron("sensory", (np.cos(6.5*np.pi/8.), np.sin(6.5*np.pi/8.)))
-         self.add_neuron("sensory", (np.cos(2.5*np.pi/8.), np.sin(2.5*np.pi/8.)))
-         #self.add_neuron("sensory", (np.cos(5.5*np.pi/8.), np.sin(5.5*np.pi/8.)))
-         #self.add_neuron("sensory", (np.cos(3.5*np.pi/8.), np.sin(3.5*np.pi/8.)))
-
-         self.add_neuron("sensory", (np.cos(7.25*np.pi/8.), np.sin(7.25*np.pi/8.)))
-         self.add_neuron("sensory", (np.cos(1.25*np.pi/8.), np.sin(1.25*np.pi/8.)))
-         self.add_neuron("sensory", (np.cos(6.25*np.pi/8.), np.sin(6.25*np.pi/8.)))
-         self.add_neuron("sensory", (np.cos(2.25*np.pi/8.), np.sin(2.25*np.pi/8.)))
-         #self.add_neuron("sensory", (np.cos(5.25*np.pi/8.), np.sin(5.25*np.pi/8.)))
-         #self.add_neuron("sensory", (np.cos(3.25*np.pi/8.), np.sin(3.25*np.pi/8.)))
-
-         #self.add_neuron("sensory", (0,0), 10000)
-
 
      def copyDynamicState(self):
          state = []
@@ -312,6 +262,10 @@ class Network:
          state.append(self.u.copy())
          state.append(self.v.copy())
          state.append(self.S.copy())
+         try:
+             state.append(self.I.copy())
+         except AttributeError:
+             pass #means its first frame and I has not been set yet
          return state
 
      def loadDynamicState(self, state):
@@ -322,33 +276,11 @@ class Network:
          self.u = state[4]
          self.v = state[5]
          self.S = state[6]
+         try:
+            self.I = state[7]
+         except IndexError:
+             pass #not set yet
 
-     def connectTestNetwork(self):
-
-
-         dis = 0
-         while(dis < 2):
-             dis += 0.05
-             print("dis: " + str(dis))
-             print("p: " + str(self.gaussian(dis, 0.3, 6.5)))
-
-         for index1 in range(0, len(self._neurons)):
-             for index2 in range(0, len(self._neurons)):
-                 if(index1 != index2):
-                     str_ = 5
-                     p = (self.gaussian(self.get_dist(index1, index2), 0.2, 4.5))
-                     if(index1 in self.senseNeurons): str_ = 40
-                     if( index1 in self.excitatoryNeurons and index2 in self.motorNeurons): str_ = 30
-                     if(index1 in self.inhibitoryNeurons and index2 in self.motorNeurons): str_ = -80
-                     if(index1 in self.inhibitoryNeurons):
-                         str_ = -15
-                         p = self.gaussian(self.get_dist(index1, index2), 0.3, 6.5)
-                     #if(index1 == self.senseNeurons[-1] and index2 in self.inhibitoryNeurons):
-                     #    p = 10
-                     #    str_ = 150
-                     if(index2 in self.motorNeurons and (self._neurons[index2].X * self._neurons[index1].X < 0) and self._neurons[index1].Y > 0):
-                         p = 0.5
-                     if(random.random() < p): self.connectNeurons(index1, index2, str_)
 
      def connectNeurons(self, n1, n2, dV = 100):
          self.S[n1, n2] = dV
