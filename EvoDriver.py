@@ -23,15 +23,25 @@ class EvoDriver():
         ## Variable Declaration
         #Simulation Variables
         self.IDcntr = 1          #keeps track so each animat gets unique id number
-        self.aNum = 1            #number of animats in each simulation
-        self.fNum = 15           #number of food items in each simulation
-        self.wSize = 20          #size of world of simulation
+        self.worlds = []         #list of world configurations
+        #self.wSize = 20          #size of world of simulation
         self.aType = "Wheel Animat"
         self.origin = (1,0)
         self.cal = 10
         self.inhib = [80,.02,.25,-65,2]
         self.excit = [320,.02,.2,-65,8]
         #self.izekVars = [80,.02,.25,-65,2,320,.02,.2,-65,8]    #parameters for izekevich parameters
+
+        ## Set up Worlds
+        fLocs1 = [(1,0),(-1,0),(0,1),(0,-1),(0,2),(0,-2),(2,0),(-2,0),(4,0),(-4,0),(0,4),(0,-4),(0,7),(7,0),(-7,0)]
+        fLocs2 = [(1,1),(2,2),(3,3),(4,4),(3,5),(2,6),(1,7),(0,8),(-2,6),(-4,4),(-6,2),(-8,0)(-5,0),(-2,-3),(-5,-5)]
+        fLocs3 = [(-2,2),(-1,0),(1,0),(-1,0),(2,-2),(3,5),(-5,5),(-8,8),(10,10),(-10,10),(10,-10),(0,-1),(0,-2),(0,-3),(0,-4)]
+        fLocs4 = [(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(20)]
+        self.worlds.append([1,15,20,fLocs1])
+        self.worlds.append([1,15,20,fLocs2])
+        self.worlds.append([1,15,20,fLocs3])
+        self.worlds.append([1,20,20,fLocs4])
+
 
         self.cycleNum = 10       #how many cycles on main loop
         self.reRankNum = 100      #how many new animats to run before reRanking
@@ -73,7 +83,7 @@ class EvoDriver():
         print "Generating Animats\n"
         for i in xrange(size):
             sP = SimParam.SimParam()
-            sP.setWorld(self.aNum,self.fNum,self.wSize)
+            for j,world in enumerate(self.worlds): sP.setWorld(j,world)
             sP.setAnimParams(1,self.IDcntr,self.aType,self.origin,self.cal,self.inhib,self.excit)
             if aa == -1:
                 aa = [[np.random.laplace()*.25 for x in xrange(self.K)] for x in xrange(self.L)] #create LxK arrays
@@ -106,25 +116,26 @@ class EvoDriver():
             maxScore = max(self.results, key=lambda x: x[1][metric])[1][metric]
             minScore = min(self.results, key=lambda x: x[1][metric])[1][metric]
             for result in self.results:
-                #to give equal weight, scores calculated based on dist of each metric result
-                try:
-                    #avgMove needs dist of results to score, cannot be done solely in simulation object, unlike others
-                    if metric == "AvgMove":
-                        print "int if avgMove"
-                        medScore = (maxScore - minScore)/2.0
-                        #compare to med score since dont want to move too little or too much
-                        score = medScore/result[1][metric]
-                        if math.isinf(score): score = 0         #moves too much or too little so 0
-                        #print "avgMove score" ,score
-                        scores[result[0]] += score
-                    else:
-                        print "in else"
-                        scores[result[0]] += (result[1][metric])
-                        #print "else score", (result[1][metric])
-                except ZeroDivisionError:
-                    pass #max is zero so will not affect score
-                except RuntimeWarning:
-                    pass #sometimes above error thrown as warning instead
+                for subResult in result[1]:
+                    #to give equal weight, scores calculated based on dist of each metric result
+                    try:
+                        #avgMove needs dist of results to score, cannot be done solely in simulation object, unlike others
+                        if metric == "AvgMove":
+                            print "int if avgMove"
+                            medScore = (maxScore - minScore)/2.0
+                            #compare to med score since dont want to move too little or too much
+                            score = medScore/subResult[metric]
+                            if math.isinf(score): score = 0         #moves too much or too little so 0
+                            #print "avgMove score" ,score
+                            scores[result[0]] += score
+                        else:
+                            print "in else"
+                            scores[result[0]] += (subResult[metric])
+                            #print "else score", (result[1][metric])
+                    except ZeroDivisionError:
+                        pass #max is zero so will not affect score
+                    except RuntimeWarning:
+                        pass #sometimes above error thrown as warning instead
             mean = np.mean(scores.items(),axis=0)[1]
             std = np.std(scores.items(),axis=0)[1]
             genData.append((metric,maxScore,minScore,mean,std,scores))

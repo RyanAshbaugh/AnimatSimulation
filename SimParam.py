@@ -11,35 +11,47 @@ For ease of use, readability, simpler to manipulate
 class SimParam():
 
     def __init__(self):
-        self.worldParams = (None,None,None)    #animNum,foodNum,worldSize
-        ## Note should change calories to be a world param
+        #general usage vars
+        self.worldParams = {1 : (None,None,None,None)}    #animNum,foodNum,worldSize,foodLocs
+        ## Note should change calories to be a food/world param
         self.animatParams = {1 : (None,None,None,None,None,None,None,None)}  #id, type, origin, calories, inhib, excit, aa, bb
 
+        #vars for evoDriver usage
+        self.worldToRun = 1     #used so World.py knows which world param to extract and use
     #####  worldParam access methods  ######
 
-    def setWorld(self,animNum,foodNum,worldSize):
-        self.worldParams = (animNum,foodNum,worldSize)
+    def setWorld(self,id,animNum,foodNum,worldSize,foodLocs):
+        self.worldParams[id] = (animNum,foodNum,worldSize,foodLocs)
 
-    def setAnimNum(self,num):
-        self.worldParams = (num,self.worldParams[1],self.worldParams[2])
+    def setAnimNum(self,id,num):
+        self.worldParams[id] = (num,self.worldParams[1],self.worldParams[2],self.worldParams[3])
 
-    def setFoodNum(self,num):
-        self.worldParams = (self.worldParams[0],num,self.worldParams[2])
+    def setFoodNum(self,id,num):
+        self.worldParams[id] = (self.worldParams[0],num,self.worldParams[2],self.worldParams[3])
 
-    def setWorldSize(self,size):
-        self.worldParams = (self.worldParams[0],self.worldParams[1],size)
+    def setWorldSize(self,id,size):
+        self.worldParams[id] = (self.worldParams[0],self.worldParams[1],size,self.worldParams[3])
 
-    def getWorld(self):
-        return self.worldParams
+    def setFoodLocs(self,id,locs):
+        self.worldParams[id] = (self.worldParams[0],self.worldParams[1],self.worldParams[2],locs)
 
-    def getAnimNum(self):
-        return self.worldParams[0]
+    def getWorldNum(self):
+        return len(self.worldParams)
 
-    def getFoodNum(self):
-        return self.worldParams[1]
+    def getWorld(self,id):
+        return self.worldParams[id]
 
-    def getWorldSize(self):
-        return self.worldParams[2]
+    def getAnimNum(self,id):
+        return self.worldParams[id][0]
+
+    def getFoodNum(self,id):
+        return self.worldParams[id][1]
+
+    def getWorldSize(self,id):
+        return self.worldParams[id][2]
+
+    def getFoodLocs(self,id):
+        return self.worldParams[id][3]
 
 
     #####  animatParam access methods  ######

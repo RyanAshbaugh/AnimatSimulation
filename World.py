@@ -22,10 +22,10 @@ class World:
 
     def __init__(self,simParam):
         self.sP = simParam
-        self.arenaSize = (self.sP.getWorldSize(),self.sP.getWorldSize()) #square arena
+        self.arenaSize = (self.sP.getWorldSize(1),self.sP.getWorldSize(1)) #square arena
         self.numBounds = [0 - self.arenaSize[0]/2., 0 + self.arenaSize[0]/2.,0 - self.arenaSize[1]/2., 0 + self.arenaSize[1]/2.]
         self.animats = []
-        for x in range(1,self.sP.getAnimNum()+1):
+        for x in range(1,self.sP.getAnimNum(1)+1):
             id = "Animat " + str(x)
             self.animats.append(AnimatShell.WheelAnimat(self.sP.getAnimParams(x)))
         self.smells = []
@@ -34,14 +34,12 @@ class World:
         self.smells.append(["Type 1", foodArray])
 
     def setup_food(self):
-        food_loc = []
+        food_loc = self.sP.getFoodLocs(self.sP.worldToRun)
         food_str = []
 
-        for x in range(0,self.sP.getFoodNum()):
-            location = (random.random()*self.arenaSize[0] - float(self.arenaSize[0])/2.,random.random()*self.arenaSize[0] - float(self.arenaSize[0])/2.)
-            food = Stimuli.Food(loc = location)
+        for loc in food_loc:
+            food = Stimuli.Food(loc = loc)
             self.foods.append(food)
-            food_loc.append(food.pos)
             food_str.append(food.amt)
 
         food_loc = np.vstack(food_loc)

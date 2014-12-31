@@ -13,13 +13,25 @@ import cPickle
 import tkFileDialog
 import json
 import SimParam
+import random
 
 class DevelopmentWindow():
 
     def __init__(self):
+        self.worlds = []
+        ## Set up worlds
+        fLocs1 = [(1,0),(-1,0),(0,1),(0,-1),(0,2),(0,-2),(2,0),(-2,0),(4,0),(-4,0),(0,4),(0,-4),(0,7),(7,0),(-7,0)]
+        fLocs2 = [(1,1),(2,2),(3,3),(4,4),(3,5),(2,6),(1,7),(0,8),(-2,6),(-4,4),(-6,2),(-8,0),(-5,0),(-2,-3),(-5,-5)]
+        fLocs3 = [(-2,2),(-1,0),(1,0),(-1,0),(2,-2),(3,5),(-5,5),(-8,8),(10,10),(-10,10),(10,-10),(0,-1),(0,-2),(0,-3),(0,-4)]
+        fLocs4 = [(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(20)]
+        self.worlds.append([1,15,20,fLocs1])
+        self.worlds.append([1,15,20,fLocs2])
+        self.worlds.append([1,15,20,fLocs3])
+        self.worlds.append([1,20,20,fLocs4])
+
         #parameters
         self.sP = SimParam.SimParam()
-        self.sP.setWorld(1,15,20)
+        self.sP.setWorld(1,self.worlds[0][0],self.worlds[0][1],self.worlds[0][2],self.worlds[0][3])   #change to change default world
         self.sP.setAnimParams(1,1,"Wheel Animat",(1,0),10,[80,.02,.25,-65,2],[320,.02,.2,-65,8])
         self.paused = True                     #paused?
         self.lastTime = 0
@@ -30,8 +42,6 @@ class DevelopmentWindow():
         self.simHistory = {}                    #this will fill with produced worlds from the simulations
         self.simEngine = SimulationEngine.SimulationEngine()
         self.developmentHistory = {}
-        #self.parameters = [1,15,20]             #[animNum,foodNum,worldSize]
-        #self.animatParams = [["Wheel Animat",(1,0),10,[80,.02,.25,-65,2],[320,.02,.2,-65,8]]]
         self.layoutHist = 300                   #y value holder for new aniimat config button placement
         self.layoutList = []                    # holds config/delete animat buttons and labels for any animats other than default
 
@@ -93,11 +103,11 @@ class DevelopmentWindow():
 
         #Set up World Parameter Options
         self.animNum_sv = tk.StringVar()
-        self.animNum_sv.set(str(self.sP.getAnimNum()))
+        self.animNum_sv.set(str(self.sP.getAnimNum(1)))
         self.foodNum_sv = tk.StringVar()
-        self.foodNum_sv.set(str(self.sP.getFoodNum()))
+        self.foodNum_sv.set(str(self.sP.getFoodNum(1)))
         self.arenaSize_sv = tk.StringVar()
-        self.arenaSize_sv.set(str(self.sP.getWorldSize()))
+        self.arenaSize_sv.set(str(self.sP.getWorldSize(1)))
         title = tk.Label(self.root, text="Parameter Settings",font="bold",relief="ridge",padx=5,pady=5)
         title.place(x=600,y=75)
         # animNum_l = tk.Label(self.root, text="Number of Animats:")
@@ -214,7 +224,7 @@ class DevelopmentWindow():
         self.origin_sv = tk.StringVar()
         self.origin_sv.set(str(self.sP.getOrigin(id)))
         self.cal_sv = tk.StringVar()
-        self.cal_sv.set(str(self.sP.getCal(id)))
+        self.cal_sv.set(str(self.sP.getCalories(id)))
         self.inhibNum_sv = tk.StringVar()
         temp = self.sP.getInhib(id)
         self.inhibNum_sv.set(temp[0])
@@ -301,7 +311,7 @@ class DevelopmentWindow():
     def saveAnimat(self,id):
         self.sP.setType(id,self.type_e.get())
         self.sP.setOrigin(id,(int(self.origin_e.get()[1]),int(self.origin_e.get()[4])))
-        self.sP.setCal(id,int(self.cal_e.get()))
+        self.sP.setCalories(id,int(self.cal_e.get()))
         inhib = [int(self.inhibNum_e.get()),float(self.inhibA_e.get()),float(self.inhibB_e.get()),
                  float(self.inhibC_e.get()),float(self.inhibD_e.get())]
         excit = [int(self.excitNum_e.get()),float(self.excitA_e.get()),float(self.excitB_e.get()),
@@ -311,7 +321,7 @@ class DevelopmentWindow():
         self.win.destroy()
 
     def addAnimat(self):
-        self.sP.setAnimNum(self.sP.getAnimNum()+1)
+        self.sP.setAnimNum(1,self.sP.getAnimNum(1)+1)
         #self.parameters[0] += 1      #increase animatNum by 1
         self.layoutHist += 50        #shift current y value down
         #id = self.sP.getAnimNum() - 1  #-1 beacause index = id-1

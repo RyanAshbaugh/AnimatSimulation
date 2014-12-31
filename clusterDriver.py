@@ -20,6 +20,7 @@ import time
 import pp
 import clusterSimEngine
 import SimParam
+import random
 
 ## wrapper class for "main method" of driver
 class ClusterDriver():
@@ -64,13 +65,13 @@ class ClusterDriver():
 class EvoClusterDriver():
 
     def __init__(self,id,simParams,metrics):
+
+        ## Other variables
         self.id = id       #used for generating animat ids
         self.sims = []     #holder for all simulation objects
         self.template = ["Wheel Animat",(1,0),10,[80,.02,.25,-65,2],[320,.02,.2,-65,8]]  #used for formatting animParams to pass to SimEngine
         self.results = []  #holder for results of
         self.metrics = metrics   #list of metrics to track
-        # self.wParams = wParams   #list containing world parameters
-        # self.aParams = aParams    #list containing lists of animat parameters
         self.simParams = simParams  #list of simParam objects for each simulation
         self.initializeSims()
 
@@ -113,16 +114,24 @@ class Simulation():
         #self.startSimulation()
         self.id = simId
         self.clusterId = clusterId
-	
+
+
 
     def startSimulation(self,metrics):
         if (not self.evo) : self.printStartupInfo()
-        #set up simEngine
-        self.simEngine.setWriteInterval(self.writeInterval)
-        #print "Sim " + str(self.id) + " starting"
-        completed = self.simEngine.initializeEngine(self.sP,self.runTime)#pass world info and animat info to simEngine
-        self.simHistory = self.simEngine.getResults()
-        return [self.sP.getID(1),self.filterResults(metrics)]
+        results = []
+        for id in xrange(1,self.sP.getWorldNum()+1):
+            self.sP.worldToRun = id
+            #set up simEngine
+            self.simEngine.setWriteInterval(self.writeInterval)
+            #print "Sim " + str(self.id) + " starting"
+            completed = self.simEngine.initializeEngine(self.sP,self.runTime)#pass world info and animat info to simEngine
+            self.simHistory = self.simEngine.getResults()
+            results.append(self.filterResults(metrics))
+        return [self.sP.getID(1),results]
+
+
+
 
     #results are scores out of 1000
     def filterResults(self,metrics):

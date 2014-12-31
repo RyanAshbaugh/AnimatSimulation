@@ -66,7 +66,7 @@ class Network:
 
          #Network connection variables
          self.Lnum = 3      #ligand number
-         self.Rnum = 4      #receptor number
+         self.Rnum = 3      #receptor number
          self.ligands = []  #holder for ligands of each neuron
          self.receptors = [] #holder for receptors of each neuron
          self.aa = -1 if aa is None else aa
