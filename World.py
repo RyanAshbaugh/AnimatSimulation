@@ -66,7 +66,7 @@ class World:
         foodState = state[0]
         animat_state = state[1]
         for i in range(0, len(foodState)):
-            self.foods[i].amount = foodState[i]
+            self.foods[i].amt = foodState[i]
         for i in range(0, len(animat_state)):
             self.animats[i].loadDynamicState(animat_state[i])
 
