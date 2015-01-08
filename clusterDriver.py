@@ -128,10 +128,18 @@ class Simulation():
             completed = self.simEngine.initializeEngine(self.sP,self.runTime)#pass world info and animat info to simEngine
             self.simHistory = self.simEngine.getResults()
             results.append(self.filterResults(metrics))
-        return [self.sP.getID(1),results]
+
+        return [self.sP.getID(1),self.avgResults(results)]
 
 
-
+    def avgResults(self,results):
+        newR = {}
+        for result in results:
+            for metric,val in result.iteritems():
+                try: newR[metric] = newR[metric] + val
+                except KeyError: newR[metric] = val
+        for metric,val in newR.iteritems():newR[metric] = newR[metric]/float(len(results))
+        return newR
 
     #results are scores out of 1000
     def filterResults(self,metrics):
