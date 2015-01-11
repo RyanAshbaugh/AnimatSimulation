@@ -1,6 +1,6 @@
 
 #AnimatSimulation
----
+
 AnimatSimulation simulates simple, virtual animals (animats) behavior using a neural network based on the Izhikevich neuron model. 
 There are 2 components to the simulation.
 
@@ -15,18 +15,21 @@ There are 2 components to the simulation.
 
 
 ## Dependencies 
----
+
 ####Evolutionary Algorithm
+
 >* [Spur](https://pypi.python.org/pypi/spur) - Used for SSH connections in cluster
 >* [Numpy](http://www.numpy.org/) - Scientific functions (also needed for visual simulation)
 >* [ParallelPython](http://www.parallelpython.com/) - Used for cluster/SMP execution and management
+
 ####Visual Simulation
+
 >* [matplotlib](http://matplotlib.org/) - Used for displaying data
 >* [Tkinter](https://wiki.python.org/moin/TkInter) - Backend library for GUI
 >* [PIL](http://www.pythonware.com/products/pil/) - Used for image processing
 
 ## To Run
----
+
 ####Evolutionary Algorithm
 1. Copy all contents of AnimatSimulation onto master node of cluster.
 2. Run startServers.py to start ParallelPython servers on all nodes in cluster. 
