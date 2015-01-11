@@ -48,7 +48,8 @@ class EvoDriver():
         self.nodeNum = 8         #how many nodes on cluster
         self.maxAnimats = 1000    #how large list of parameters should be
         self.newGenSize = 100    #how many new animats to generate each iteration of evo alg
-        self.toTrack = ["FindsFood","AvgMove"]         #list of metrics to track
+        ## NOTE when adding metrics to toTrack, make sure they are included in Simulation.filterResults
+        self.toTrack = ["Energy","AvgMove","FoodsEaten"]         #list of metrics to track
         self.animats = []         #list of simParams
         self.results = []         #all results returned from Simulation, used to rank Animats on performance
         self.nodeP2Ps = [("10.2.1." + str(i) + ":60000") for i in xrange(2,12)]     #P2P address for each node on cluste
@@ -101,46 +102,29 @@ class EvoDriver():
 
 
 
-    # This will take the list of animats, and sort them based on performance metrics
-    # This will take the list of animats, and sort them based on performance metrics
+
+    # Sorts list of animats based on results from simulations
     def rankAnimats(self):
         print "Ranking Animats"
         genData = []
         scores = {}    #dictionary of scores with ids as keys
-        for result in self.results:
-            #print result
-            scores[result[0]] = 0
         #calculate score based on each metric
         for metric in self.toTrack:
             print metric
-            #find distribution of results
-            maxScore = max(self.results, key=lambda x: x[1][metric])[1][metric]
-            minScore = min(self.results, key=lambda x: x[1][metric])[1][metric]
-            for result in self.results:
-                #to give equal weight, scores calculated based on dist of each metric result
+            #build list of all results for this metric
+            results = sorted([(id,result[metric]) for id,result in self.results], key= lambda x: x[1])
+            #use simulation results to calculate max,min,mean,std so that evo performance can be tracked
+            maxResult = results[-1][1]
+            minResult = results[0][1]
+            mean = np.mean(results,axis=0)[1]
+            std = np.std(results,axis=0)[1]
+            for i,result in enumerate(results):
                 try:
-                    #avgMove needs dist of results to score, cannot be done solely in simulation object, unlike others
-                    if metric == "AvgMove":
-                        print "int if avgMove"
-                        medScore = (maxScore - minScore)/2.0
-                        #compare to med score since dont want to move too little or too much
-                        score = medScore/result[1][metric]
-                        if math.isinf(score): score = 0         #moves too much or too little so 0
-                        #print "avgMove score" ,score
-                        scores[result[0]] += score
-                    else:
-                        print "in else"
-                        scores[result[0]] += (result[1][metric])
-                        #print "else score", (result[1][metric])
-                except ZeroDivisionError:
-                    pass #max is zero so will not affect score
-                except RuntimeWarning:
-                    pass #sometimes above error thrown as warning instead
-            mean = np.mean(scores.items(),axis=0)[1]
-            std = np.std(scores.items(),axis=0)[1]
-            genData.append((metric,maxScore,minScore,mean,std,scores))
-
-        #sort based on scores
+                    scores[result[0]] += (i+1)    #update score based on position in sorted list, add 1 so score > 0
+                except KeyError:                  #KeyError when score updated for first time, so catch and set
+                    scores[result[0]] = (i+1)
+            genData.append((metric,maxResult,minResult,mean,std,scores))
+        #sort animats based on scores
         self.animats = self.sortByScores(scores)
         self.genData.append(genData)
 
@@ -149,7 +133,6 @@ class EvoDriver():
     #takes dictionary of scores and sorts animat list accordingly
     def sortByScores(self,scores):
         idOrder = sorted(scores.items(), key=operator.itemgetter(1)) #return ids of animats in sorted order
-        print idOrder
         newAnim = []
         for id in idOrder:
             for sP in self.animats:

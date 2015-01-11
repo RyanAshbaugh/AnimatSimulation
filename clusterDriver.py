@@ -147,7 +147,12 @@ class Simulation():
         if "Energy" in metrics: temp["Energy"] = self.getNrg()
         if "FindsFood" in metrics: temp["FindsFood"] = self.findsFood()
         if "AvgMove" in metrics: temp["AvgMove"] = self.avgMove()
+        if "FoodsEaten" in metrics: temp["FoodsEaten"] = self.foodsEaten()
         return temp
+
+    #returns number of foods eaten by animat
+    def foodsEaten(self):
+        return len(self.simHistory[-1][1].getFood()) - len(np.nonzero(self.simHistory[-1][1].getFood()))
 
     #returns list of tuples of (time,energy)
     def getNrg(self):

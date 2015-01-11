@@ -20,7 +20,7 @@ class DevelopmentWindow():
     def __init__(self):
         self.worlds = []
         ## Set up worlds
-        fLocs1 = [(1,0),(-1,0),(0,1),(0,-1),(0,2),(0,-2),(2,0),(-2,0),(4,0),(-4,0),(0,4),(0,-4),(0,7),(7,0),(-7,0)]
+        fLocs1 = [(2,0),(-2,0),(0,2),(0,-2),(0,3),(0,-3),(3,0),(-3,0),(4,0),(-4,0),(0,4),(0,-4),(0,7),(7,0),(-7,0)]
         fLocs2 = [(1,1),(2,2),(3,3),(4,4),(3,5),(2,6),(1,7),(0,8),(-2,6),(-4,4),(-6,2),(-8,0),(-5,0),(-2,-3),(-5,-5)]
         fLocs3 = [(-2,2),(-1,0),(1,0),(-1,0),(2,-2),(3,5),(-5,5),(-8,8),(10,10),(-10,10),(10,-10),(0,-1),(0,-2),(0,-3),(0,-4)]
         fLocs4 = [(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(20)]
@@ -31,7 +31,7 @@ class DevelopmentWindow():
 
         #parameters
         self.sP = SimParam.SimParam()
-        self.sP.setWorld(1,self.worlds[0][0],self.worlds[0][1],self.worlds[0][2],self.worlds[0][3])   #change to change default world
+        self.sP.setWorld(1,self.worlds[2][0],self.worlds[2][1],self.worlds[2][2],self.worlds[2][3])   #change first index to change default world
         self.sP.setAnimParams(1,1,"Wheel Animat",(1,0),10,[80,.02,.25,-65,2],[320,.02,.2,-65,8])
         self.paused = True                     #paused?
         self.lastTime = 0

@@ -260,3 +260,21 @@ class SensoryNeuron(Neuron):
         #print "DRIVE IS: " + str(drive)
         self.drive = drive*self.DRIVE_CONSTANT
         if self.drive > 200: self.drive = 200
+
+class HungerNeuron(Neuron):
+    def __init__(self, X, Y, i):
+        Neuron.__init__(self, X, Y, i)
+        self.a = 0.02
+        self.b = 0.2
+        self.c = -65 + 15 * math.pow(0.5, 2)
+        self.d = 8 - 6 * math.pow(0.5, 2)
+        self.u = self.b*self.membranePotential
+        self.p_E = .1
+        self.p_I = .5
+        self.dv_E = 100
+        self.dv_I = 2.7
+        self.dv_M = 100
+        self.drive = 0
+        self.DRIVE_CONSTANT = 50000
+        self.firing_color = "#000000"
+        self.color = "#b1ffb1"

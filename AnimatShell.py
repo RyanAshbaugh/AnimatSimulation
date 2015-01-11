@@ -160,9 +160,9 @@ class WheelAnimat(Animat):
 
         #print(whichFoods.size)
         if whichFoods.size > 0:
-            print "which foods size", whichFoods.size
-            print "food dist", food_dist
-            print np.logical_and(food_dist[0] < .5, food_amt > 0).nonzero()
+            #print "which foods size", whichFoods.size
+            #print "food dist", food_dist
+            #print np.logical_and(food_dist[0] < .5, food_amt > 0).nonzero()
             #print foods[1]
             self.Eating = 1
             #print food_amt
@@ -172,7 +172,7 @@ class WheelAnimat(Animat):
                 print "Eat error"
                 self.Energy += self.Calories * food_amt[whichFoods][0]
             food_amt[whichFoods] -= 1.0
-            print food_amt[whichFoods]
+            #print food_amt[whichFoods]
 
 
 #            if self.foodAmts[self.whichFood] < 0: # eliminate food that's gone from the world data structure
