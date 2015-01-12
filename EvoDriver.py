@@ -112,18 +112,18 @@ class EvoDriver():
         for metric in self.toTrack:
             print metric
             #build list of all results for this metric
-            results = sorted([(id,result[metric]) for id,result in self.results], key= lambda x: x[1])
+            results = [(id,result[metric]) for id,result in self.results]
             #use simulation results to calculate max,min,mean,std so that evo performance can be tracked
-            maxResult = results[-1][1]
-            minResult = results[0][1]
+            maxResult = max(results, key= lambda x: x[1])
+            minResult = min(results, key= lambda x: x[1])
             mean = np.mean(results,axis=0)[1]
-            std = np.std(results,axis=0)[1]
-            for i,result in enumerate(results):
+            sd = np.std(results,axis=0)[1]
+            for id,result in results:
                 try:
-                    scores[result[0]] += (i+1)    #update score based on position in sorted list, add 1 so score > 0
+                    scores[id] += (result-mean)/sd    #score is sum of z scores for all metrics
                 except KeyError:                  #KeyError when score updated for first time, so catch and set
-                    scores[result[0]] = (i+1)
-            genData.append((metric,maxResult,minResult,mean,std,scores))
+                    scores[id] = (result-mean)/sd
+            genData.append((metric,maxResult,minResult,mean,sd,scores))
         #sort animats based on scores
         self.animats = self.sortByScores(scores)
         self.genData.append(genData)
