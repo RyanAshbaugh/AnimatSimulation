@@ -31,8 +31,8 @@ class DevelopmentWindow():
 
         #parameters
         self.sP = SimParam.SimParam()
-        self.sP.setWorld(1,self.worlds[2][0],self.worlds[2][1],self.worlds[2][2],self.worlds[2][3])   #change first index to change default world
-        self.sP.setAnimParams(1,1,"Wheel Animat",(1,0),10,[80,.02,.25,-65,2],[320,.02,.2,-65,8])
+        self.sP.setWorld(1,self.worlds[1][0],self.worlds[1][1],self.worlds[1][2],self.worlds[1][3])   #change first index to change default world
+        self.sP.setAnimParams(1,1,"Wheel Animat",(1,0),1,[80,.02,.25,-65,2],[320,.02,.2,-65,8])
         self.paused = True                     #paused?
         self.lastTime = 0
         self.sim_msps = 0

@@ -44,6 +44,7 @@ class Network:
          self.S = np.array([[]], dtype = np.float32)
          self.u=self.b*self.v;                 # Initial values of u at ceiling
 
+
          #'Shadow' Variables
          self.fireTogetherCount = np.array([], ndmin = 2, dtype = np.float)
          self.firingCount = np.array([])
@@ -196,7 +197,8 @@ class Network:
              for j in xrange(10):
                  xPos = -.45+(i*(0.1))
                  yPos = -.45+(j*(0.1))
-                 self.add_neuron("excitatory",(xPos,yPos))
+                 if (i == 4 or i == 5) and (j == 4 or j== 5): self.add_neuron("hunger",(xPos,yPos))
+                 else: self.add_neuron("excitatory",(xPos,yPos))
                  ## Below code to add inhib neurons
                  #if i == 2 or i == 7:                                  #in rows 3 and 8 of grid
                  #    if(j in xrange(2,7)):                             #for neurons 3-7
@@ -216,13 +218,6 @@ class Network:
          K = 5
          A = 2.0
          B = 10000.0
-         #for i in xrange(100):
-         #   self.runNetwork()
-         ##HACK should be defined by evo alg
-         # a = [[0 for x in xrange(K)] for x in xrange(L)] #create LxK arrays
-         # b = [[0 for x in xrange(K)] for x in xrange(L)]
-         # a[0][0],a[0][1] = 2,-2
-         # b[0][0],b[0][1] = 2,2
          if self.aa == -1:        #if -1 then means aa and bb not already defined
             aa = [[np.random.laplace()*.25 for x in xrange(K)] for x in xrange(L)] #create LxK arrays
             bb = [[np.random.laplace()*.25 for x in xrange(K)] for x in xrange(L)]
@@ -232,21 +227,14 @@ class Network:
          else:
              aa = self.aa        #makes line length shorter
              bb = self.bb
-         #print "aa",aa
-         #print "bb",bb
-
          #set up ligand and receptor lists for each neuron based on a and b
          for z,neuron in enumerate(self._neurons):
             x,y = neuron.X,neuron.Y
             r = [aa[i][0] + aa[i][1]*x + aa[i][2]*y + aa[i][3]*np.cos(np.pi*x) + aa[i][4]*np.cos(np.pi*y) for i in xrange(3)]
             l = [bb[i][0] + bb[i][1]*x + bb[i][2]*y + bb[i][3]*np.cos(np.pi*x) + bb[i][4]*np.cos(np.pi*y) for i in xrange(3)]
-            #r = [a[i][1]*x+a[i][1]*y+a[i][2]*(1+math.cos(math.pi*x))+a[i][3]*(1+math.cos(math.pi*y)) for i in xrange(3)]
-            #l = [b[i][1]*x+b[i][1]*y+b[i][2]*(1+math.cos(math.pi*x))+b[i][3]*(1+math.cos(math.pi*y)) for i in xrange(3)]
             neuron.setRL(r,l)
-            #print "r",r
-            #print "l",l
          #for every neuron in the "grid"
-         for index1 in (np.hstack((self.excitatoryNeurons,self.inhibitoryNeurons))):
+         for index1 in (np.hstack((self.excitatoryNeurons,self.inhibitoryNeurons,self.hungerNeurons))):
             #if edge neuron, connect to appropriate motor
             if (self._neurons[index1].X==-0.45): self.connectNeurons(index1,self.motorNeurons[0],30)
             if (self._neurons[index1].X==0.45): self.connectNeurons(index1,self.motorNeurons[1],30)
@@ -254,7 +242,7 @@ class Network:
             if (self._neurons[index1].Y==0.45):
                 for sense in self.senseNeurons:
                     self.connectNeurons(sense,index1,30)
-            for index2 in (np.hstack((self.excitatoryNeurons,self.inhibitoryNeurons))):
+            for index2 in (np.hstack((self.excitatoryNeurons,self.inhibitoryNeurons,self.hungerNeurons))):
                 #str_ = 5
                 if (index1 != index2):
                     if (index1 in self.inhibitoryNeurons): str_ = -15
@@ -268,7 +256,8 @@ class Network:
                     if(random.random() < p):
                         #print str(type(n1)) + " @(" + str(n1.X) + "," + str(n1.Y) + ") ---> " + str(type(n2)) +\
                         #      " @(" + str(n2.X) + "," + str(n2.Y) + ")"
-                        self.connectNeurons(index1, index2, 5)
+                        self.connectNeurons(index1, index2, 10)
+         self.I = 2*np.ones( (self.totalNum), dtype = np.float32 )
 
 
 
@@ -361,6 +350,8 @@ class Network:
          self.v=self.v+0.5*(0.04*(self.v**2) + 5*self.v + 140-self.u + self.I)
 
          self.u=self.u+self.a*(self.b*self.v - self.u)
+
+         self.I = 2*np.ones( (self.totalNum), dtype = np.float32 )  #moved from smell method to end of runNetwork
 
 
 

@@ -250,7 +250,7 @@ class SensoryNeuron(Neuron):
         self.drive = 0
         self.DRIVE_CONSTANT = 50000
         self.firing_color = "#000000"
-        self.color = "#b1ffb1"
+        self.color = "#FFFF00"
 
     def getDrive(self,dt):
         return self.drive
@@ -277,4 +277,4 @@ class HungerNeuron(Neuron):
         self.drive = 0
         self.DRIVE_CONSTANT = 50000
         self.firing_color = "#000000"
-        self.color = "#b1ffb1"
+        self.color = "#33CC33"

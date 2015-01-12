@@ -36,6 +36,7 @@ class Animat():
         self.direc = np.pi/2.0
         self.Eating = False #does not start eating
         self.Energy = 200
+        self.hungerThreshold = .5 * self.Energy
         self.maxInputStrength = np.ones(self.net.totalNum)*200.
         #self.image = pygame.image.load("roomba.png").convert_alpha()
     
@@ -123,8 +124,9 @@ class WheelAnimat(Animat):
 
         #built-in!
         total_smell = self.net.sensitivity* np.sum(  self.gaussian(scipy.spatial.distance.cdist(worldPos, smell_loc ), 0, 3) *smell_str, axis=1)  #figures out the total smell strength based on the distances (gaussian distribution)
-        self.net.I = 2*np.ones( (self.net.totalNum), dtype = np.float32 )       #sets I to be zero for all neurons
+
         self.net.I[self.net.senseNeurons] = np.minimum(total_smell,100)   #sense neuron drive based on smell
+
 
 
     def gaussian(self, x, mu, sig):
@@ -149,36 +151,18 @@ class WheelAnimat(Animat):
         food_amt = foods[1][1]
 
         food_dist = scipy.spatial.distance.cdist(np.array([self.pos]), food_loc)
-        #print(food_amt)
-        #print(food_dist[0])
-        #self.foodDist = np.sqrt(((np.tile( self.pos, [1, self.foodPos.shape(1)]) - self.foodPos )**2).sum(axis=0)
         whichFoods = np.logical_and(food_dist[0] < .5, food_amt > 0).nonzero()[0]
 
         #print(whichFoods.size)
         if whichFoods.size > 0:
-            #print "which foods size", whichFoods.size
-            #print "food dist", food_dist
-            #print np.logical_and(food_dist[0] < .5, food_amt > 0).nonzero()
-            #print foods[1]
             self.Eating = 1
-            #print food_amt
             self.Energy += self.Calories * food_amt[whichFoods]
-            # try:
-            #     self.Energy += self.Calories * food_amt[whichFoods]
-            # except ValueError:
-            #     print "Eat error"
-            #     self.Energy += self.Calories * food_amt[whichFoods][0]
             food_amt[whichFoods] -= 1.0
-            #print food_amt[whichFoods]
-
-
-#            if self.foodAmts[self.whichFood] < 0: # eliminate food that's gone from the world data structure
-#                self.net.nn = (self.foodAmts > 0).nonzero()
-#                self.foodAmts = self.foodAmts[self.net.getNN()]
-#                self.foodPos = self.foodPos[:,self.net.getNN()]
-#        if math.minimum(self.foodDist) > 0.1:
         else:
             self.Eating = 0 #move if not near food
+        #check if hungry
+        if self.Energy <= self.hungerThreshold:
+            self.net.I[self.net.hungerNeurons] = 105  #-65->30 = 95 + 10 = 105
         return food_amt
 
 
