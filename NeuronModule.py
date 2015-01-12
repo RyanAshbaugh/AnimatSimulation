@@ -263,7 +263,7 @@ class SensoryNeuron(Neuron):
 
 class HungerNeuron(Neuron):
     def __init__(self, X, Y, i):
-        Neuron.__init__(self, X, Y, i)
+        Neuron.__init__(self, 65,X, Y, i)
         self.a = 0.02
         self.b = 0.2
         self.c = -65 + 15 * math.pow(0.5, 2)

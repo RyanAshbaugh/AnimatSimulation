@@ -11,6 +11,7 @@ from NeuronModule import InhibitoryNeuron
 from NeuronModule import ExcitatoryNeuron
 from NeuronModule import MotorNeuron
 from NeuronModule import SensoryNeuron
+from NeuronModule import HungerNeuron
 import math
 import numpy as np
 import random
@@ -27,6 +28,7 @@ class Network:
          self.numInhibitory = 0
          self.numMotor = 0
          self.numSensory = 0
+         self.numHunger = 0
          self.totalNum = 0
          self.inhibParams = inhib
          self.excitParams = excit
@@ -58,6 +60,7 @@ class Network:
          self.inhibitoryNeurons = np.array([], dtype=np.int_)
          self.excitatoryNeurons = np.array([], dtype=np.int_)
          self.motorNeurons = np.array([], dtype=np.int_)
+         self.hungerNeurons = np.array([],dtype=np.int_)
 
          #These will be dictionaries of Lists eventually for different types of sensory neurons!
          self.senseNeurons = np.array([], dtype=np.int_)
@@ -98,6 +101,7 @@ class Network:
              self.excitatoryNeurons += 1
              self.motorNeurons += 1
              self.senseNeurons += 1
+             self.hungerNeurons += 1
 
          if type == 'excitatory':
              loc = self.numExcitatory + self.numInhibitory
@@ -112,6 +116,7 @@ class Network:
 
              self.motorNeurons += 1
              self.senseNeurons += 1
+             self.hungerNeurons += 1
 
          if type == 'motor':
              loc = self.numExcitatory + self.numInhibitory + self.numMotor
@@ -125,6 +130,7 @@ class Network:
              self.numMotor += 1
 
              self.senseNeurons += 1
+             self.hungerNeurons += 1
 
          if type == 'sensory':
              loc = self.numExcitatory + self.numInhibitory + self.numMotor + self.numSensory
@@ -140,6 +146,19 @@ class Network:
              self.v = np.insert(self.v, loc, -65)
              self.sensitivity = np.append(self.sensitivity, sensitivity)
              self.numSensory += 1
+
+             self.hungerNeurons += 1
+
+         if type == 'hunger':
+             loc = self.numExcitatory + self.numInhibitory + self.numMotor + self.numSensory + self.numHunger
+             self._neurons.insert(loc, HungerNeuron(pos[0], pos[1], 0))
+             self.hungerNeurons = np.append(self.hungerNeurons, loc)
+             self.a = np.insert(self.a, loc, 0.02)
+             self.b = np.insert(self.b, loc, 0.2)
+             self.c = np.insert(self.c, loc, -65)
+             self.d = np.insert(self.d, loc, 8)
+             self.v = np.insert(self.v, loc, -65)
+             self.numHunger += 1
 
          #'Shadow' Variables
          if(self.totalNum == 0):
@@ -229,8 +248,8 @@ class Network:
          #for every neuron in the "grid"
          for index1 in (np.hstack((self.excitatoryNeurons,self.inhibitoryNeurons))):
             #if edge neuron, connect to appropriate motor
-            if (self._neurons[index1].X==-0.45): self.connectNeurons(index1,self.motorNeurons[0],20)
-            if (self._neurons[index1].X==0.45): self.connectNeurons(index1,self.motorNeurons[1],20)
+            if (self._neurons[index1].X==-0.45): self.connectNeurons(index1,self.motorNeurons[0],30)
+            if (self._neurons[index1].X==0.45): self.connectNeurons(index1,self.motorNeurons[1],30)
             #if top neuron, connect each sense neuron to it
             if (self._neurons[index1].Y==0.45):
                 for sense in self.senseNeurons:
@@ -249,7 +268,7 @@ class Network:
                     if(random.random() < p):
                         #print str(type(n1)) + " @(" + str(n1.X) + "," + str(n1.Y) + ") ---> " + str(type(n2)) +\
                         #      " @(" + str(n2.X) + "," + str(n2.Y) + ")"
-                        self.connectNeurons(index1, index2, 10)
+                        self.connectNeurons(index1, index2, 5)
 
 
 
@@ -289,10 +308,6 @@ class Network:
          n1 = self._neurons[i1]
          n2 = self._neurons[i2]
          return np.sqrt((n1.X-n2.X)**2 + (n1.Y-n2.Y)**2)
-
-     def gaussian(self, x, mu, sig):
-         return np.exp(-1 * (x - mu**2.) / 2 * sig**2.)
-
 
      def getAverageExcitatoryVoltage(self):
         self.sumVoltage = 0
@@ -350,11 +365,10 @@ class Network:
 
 
      #uses voltages of firing motorNeurons to return new motor data
-     def getMotorData(self,m1,m2):
+     def getMotorData(self):
 
-         newM1 = 0 if(self.v[self.motorNeurons[0]] <= 20) else 20
-         newM2 = 0 if(self.v[self.motorNeurons[1]] <= 20) else 20
-
+         newM1 = 0 if(self.v[self.motorNeurons[0]] <= 30) else (self.v[self.motorNeurons[0]])/30 + 30
+         newM2 = 0 if(self.v[self.motorNeurons[1]] <= 30) else (self.v[self.motorNeurons[0]])/30 + 30
          return newM1,newM2
 
      def getTotalNeuronNum(self):

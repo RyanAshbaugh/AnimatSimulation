@@ -8,7 +8,7 @@ Base Class for Animat Object
 """
 
 import numpy as np
-from numpy import *
+#from numpy import *
 import math as math
 import scipy.spatial
 import time
@@ -96,27 +96,24 @@ class WheelAnimat(Animat):
        
         
     def move(self, trac, t):
-
         #set each wheel
-        self.motors[0],self.motors[1] = self.net.getMotorData(self.motors[0],self.motors[1])
-        #HACK should be done inside network
+        self.motors[0],self.motors[1] = self.net.getMotorData()  #right now only ever 0 or 20
         trac = .001 #need to change that later
         if self.Eating:
             self.motors = np.array([[0],[0]])
-            trac = 0
+            trac = 0       #causes no movement
 
         # rotate body depending on the difference (hopefully small) of two motors along direction of travel
         self.direc = self.direc + math.atan(trac*(self.motors[1]-self.motors[0])/self.radius)
-        self.unwind() #the angle direc could exceed 2*pi and 'wind up'
+        #self.unwind() #the angle direc could exceed 2*pi and 'wind up'
         self.determineMotion(trac)
-
         self.Energy = self.Energy - self.cMotionEnergy * self.motors.sum(axis=0) - self.kBasalEnergy
 
     def smell(self, smells):
         smell_type = smells[0]
 
         smell_loc = smells[1][0]        #smell locations
-        smell_str = smells[1][1] * 100   #smell strengths
+        smell_str = smells[1][1] / 10       #smell strengths, divide by 10 because smell based on amount should fix
 
         dir = -(self.direc - math.pi/2)   #figure out the clockwise direction of the animat
         if(dir <= 0): dir += math.pi*2    #bound direction to [0, 2*pi]
@@ -127,7 +124,6 @@ class WheelAnimat(Animat):
         #built-in!
         total_smell = self.net.sensitivity* np.sum(  self.gaussian(scipy.spatial.distance.cdist(worldPos, smell_loc ), 0, 3) *smell_str, axis=1)  #figures out the total smell strength based on the distances (gaussian distribution)
         self.net.I = 2*np.ones( (self.net.totalNum), dtype = np.float32 )       #sets I to be zero for all neurons
-
         self.net.I[self.net.senseNeurons] = np.minimum(total_smell,100)   #sense neuron drive based on smell
 
 
@@ -143,7 +139,7 @@ class WheelAnimat(Animat):
         
     # direction and traction determine motion
     def determineMotion(self,trac):
-        self.posInc = trac * mean(self.motors) * array([np.cos(self.direc), np.sin(self.direc)])
+        self.posInc = trac * np.mean(self.motors) * np.array([np.cos(self.direc), np.sin(self.direc)])
         self.pos = self.pos + self.posInc
         
     # 'Eat' if at food    
@@ -166,11 +162,12 @@ class WheelAnimat(Animat):
             #print foods[1]
             self.Eating = 1
             #print food_amt
-            try:
-                self.Energy += self.Calories * food_amt[whichFoods]
-            except ValueError:
-                print "Eat error"
-                self.Energy += self.Calories * food_amt[whichFoods][0]
+            self.Energy += self.Calories * food_amt[whichFoods]
+            # try:
+            #     self.Energy += self.Calories * food_amt[whichFoods]
+            # except ValueError:
+            #     print "Eat error"
+            #     self.Energy += self.Calories * food_amt[whichFoods][0]
             food_amt[whichFoods] -= 1.0
             #print food_amt[whichFoods]
 
