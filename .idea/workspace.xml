@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="865f0d3c-1a99-44c3-ad76-d51c6eca1308" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/AnimatShell.py" afterPath="$PROJECT_DIR$/AnimatShell.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/EvoDriver.py" afterPath="$PROJECT_DIR$/EvoDriver.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/NetworkModule.py" afterPath="$PROJECT_DIR$/NetworkModule.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/clusterDriver.py" afterPath="$PROJECT_DIR$/clusterDriver.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/GUIdriver.py" afterPath="$PROJECT_DIR$/GUIdriver.py" />
     </list>
     <ignored path="AnimatSimulation.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -44,8 +40,8 @@
       <file leaf-file-name="NeuronModule.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/NeuronModule.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="4159" max-vertical-offset="4760">
-              <caret line="279" column="30" selection-start-line="279" selection-start-column="30" selection-end-line="279" selection-end-column="30" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="51" max-vertical-offset="4760">
+              <caret line="93" column="39" selection-start-line="93" selection-start-column="39" selection-end-line="93" selection-end-column="39" />
               <folding />
             </state>
           </provider>
@@ -74,11 +70,45 @@
       <file leaf-file-name="NetworkModule.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/NetworkModule.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="3037" max-vertical-offset="6341">
+            <state vertical-scroll-proportion="0.0" vertical-offset="1558" max-vertical-offset="6341">
               <caret line="366" column="0" selection-start-line="366" selection-start-column="0" selection-end-line="366" selection-end-column="0" />
               <folding>
                 <element signature="e#166#207#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="GUIdriver.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/GUIdriver.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.7836364" vertical-offset="6403" max-vertical-offset="7446">
+              <caret line="556" column="33" selection-start-line="556" selection-start-column="33" selection-end-line="556" selection-end-column="33" />
+              <folding>
+                <element signature="e#18067#18379#0" expanded="false" />
+                <element signature="e#18758#19081#0" expanded="false" />
+                <element signature="e#19508#19712#0" expanded="false" />
+                <element signature="e#19760#20026#0" expanded="false" />
+                <element signature="e#20076#20597#0" expanded="false" />
+                <element signature="e#20649#20728#0" expanded="false" />
+                <element signature="e#20763#20908#0" expanded="false" />
+                <element signature="e#20949#21052#0" expanded="false" />
+                <element signature="e#21082#21171#0" expanded="false" />
+                <element signature="e#21217#22012#0" expanded="false" />
+                <element signature="e#22060#24697#0" expanded="false" />
+                <element signature="e#24765#25118#0" expanded="false" />
+                <element signature="e#25158#25910#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Graph.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Graph.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="1949" max-vertical-offset="7293">
+              <caret line="95" column="32" selection-start-line="95" selection-start-column="32" selection-end-line="95" selection-end-column="32" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -93,10 +123,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AnimatShell.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="AnimatShell.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/AnimatShell.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.78" vertical-offset="2325" max-vertical-offset="3451">
+            <state vertical-scroll-proportion="0.0" vertical-offset="2325" max-vertical-offset="3451">
               <caret line="162" column="33" selection-start-line="162" selection-start-column="33" selection-end-line="162" selection-end-column="33" />
               <folding />
             </state>
@@ -115,7 +145,6 @@
         <option value="$USER_HOME$/AppData/Local/Temp/scp58667/home/lucasrh/.bashrc" />
         <option value="$PROJECT_DIR$/SimParam.py" />
         <option value="$PROJECT_DIR$/World.py" />
-        <option value="$PROJECT_DIR$/GUIdriver.py" />
         <option value="$USER_HOME$/AppData/Local/Temp/scp06726/home/lucasrh/AnimatSimulation/EvoDriver.py" />
         <option value="$USER_HOME$/AppData/Local/Temp/scp58055/home/lucasrh/AnimatSimulation/EvoDriver.py" />
         <option value="$USER_HOME$/AppData/Local/Temp/scp07201/home/lucasrh/AnimatSimulation/EvoDriver.py" />
@@ -129,6 +158,7 @@
         <option value="$USER_HOME$/AppData/Local/Temp/scp18384/home/lucasrh/AnimatSimulation/EvoDriver.py" />
         <option value="$PROJECT_DIR$/clusterDriver.py" />
         <option value="$PROJECT_DIR$/AnimatShell.py" />
+        <option value="$PROJECT_DIR$/GUIdriver.py" />
       </list>
     </option>
   </component>
@@ -164,7 +194,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -185,6 +214,7 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -404,7 +434,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1296" height="736" extended-state="7" />
+    <frame x="-8" y="-8" width="1296" height="736" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -742,13 +772,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Graph.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-10.655519" vertical-offset="6695" max-vertical-offset="7293">
-          <caret line="25" column="31" selection-start-line="25" selection-start-column="31" selection-end-line="25" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/SimulationEngine.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.2782324" vertical-offset="459" max-vertical-offset="3570">
@@ -774,34 +797,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/GUIdriver.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="2091" max-vertical-offset="9333">
-          <caret line="19" column="23" selection-start-line="19" selection-start-column="23" selection-end-line="19" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Stimuli.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="304" max-vertical-offset="867">
-          <caret line="41" column="25" selection-start-line="41" selection-start-column="25" selection-end-line="41" selection-end-column="25" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/DevelopmentWindow.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="4233" max-vertical-offset="6596">
           <caret line="178" column="46" selection-start-line="178" selection-start-column="46" selection-end-line="178" selection-end-column="46" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/NeuronModule.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="4159" max-vertical-offset="4760">
-          <caret line="279" column="30" selection-start-line="279" selection-start-column="30" selection-end-line="279" selection-end-column="30" />
           <folding />
         </state>
       </provider>
@@ -818,7 +817,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="2176" max-vertical-offset="3434">
           <caret line="163" column="39" selection-start-line="163" selection-start-column="39" selection-end-line="163" selection-end-column="39" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -834,17 +832,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-1.2981818" vertical-offset="1377" max-vertical-offset="3978">
           <caret line="48" column="61" selection-start-line="48" selection-start-column="61" selection-end-line="48" selection-end-column="61" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/NetworkModule.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="3037" max-vertical-offset="6341">
-          <caret line="366" column="0" selection-start-line="366" selection-start-column="0" selection-end-line="366" selection-end-column="0" />
-          <folding>
-            <element signature="e#166#207#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -858,9 +845,65 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/AnimatShell.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.78" vertical-offset="2325" max-vertical-offset="3451">
+        <state vertical-scroll-proportion="0.0" vertical-offset="2325" max-vertical-offset="3451">
           <caret line="162" column="33" selection-start-line="162" selection-start-column="33" selection-end-line="162" selection-end-column="33" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/NeuronModule.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1887" max-vertical-offset="4760">
+          <caret line="93" column="39" selection-start-line="93" selection-start-column="39" selection-end-line="93" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Stimuli.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="304" max-vertical-offset="867">
+          <caret line="41" column="25" selection-start-line="41" selection-start-column="25" selection-end-line="41" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Graph.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1949" max-vertical-offset="7293">
+          <caret line="95" column="32" selection-start-line="95" selection-start-column="32" selection-end-line="95" selection-end-column="32" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/NetworkModule.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1558" max-vertical-offset="6341">
+          <caret line="366" column="0" selection-start-line="366" selection-start-column="0" selection-end-line="366" selection-end-column="0" />
+          <folding>
+            <element signature="e#166#207#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/GUIdriver.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.7836364" vertical-offset="6403" max-vertical-offset="7446">
+          <caret line="556" column="33" selection-start-line="556" selection-start-column="33" selection-end-line="556" selection-end-column="33" />
+          <folding>
+            <element signature="e#18067#18379#0" expanded="false" />
+            <element signature="e#18758#19081#0" expanded="false" />
+            <element signature="e#19508#19712#0" expanded="false" />
+            <element signature="e#19760#20026#0" expanded="false" />
+            <element signature="e#20076#20597#0" expanded="false" />
+            <element signature="e#20649#20728#0" expanded="false" />
+            <element signature="e#20763#20908#0" expanded="false" />
+            <element signature="e#20949#21052#0" expanded="false" />
+            <element signature="e#21082#21171#0" expanded="false" />
+            <element signature="e#21217#22012#0" expanded="false" />
+            <element signature="e#22060#24697#0" expanded="false" />
+            <element signature="e#24765#25118#0" expanded="false" />
+            <element signature="e#25158#25910#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
