@@ -242,7 +242,7 @@ class Network:
             if (self._neurons[index1].Y==0.45):
                 for sense in self.senseNeurons:
                     self.connectNeurons(sense,index1,30)
-            for index2 in (np.hstack((self.excitatoryNeurons,self.inhibitoryNeurons,self.hungerNeurons))):
+            for index2 in (np.hstack((self.excitatoryNeurons,self.inhibitoryNeurons))):
                 #str_ = 5
                 if (index1 != index2):
                     if (index1 in self.inhibitoryNeurons): str_ = -15

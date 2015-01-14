@@ -27,7 +27,7 @@ class EvoDriver():
         #self.wSize = 20          #size of world of simulation
         self.aType = "Wheel Animat"
         self.origin = (1,0)
-        self.cal = 10
+        self.cal = 1
         self.inhib = [80,.02,.25,-65,2]
         self.excit = [320,.02,.2,-65,8]
         #self.izekVars = [80,.02,.25,-65,2,320,.02,.2,-65,8]    #parameters for izekevich parameters
@@ -43,13 +43,13 @@ class EvoDriver():
         self.worlds.append([1,20,20,fLocs4])
 
 
-        self.cycleNum = 10       #how many cycles on main loop
+        self.cycleNum = 20       #how many cycles on main loop
         self.reRankNum = 100      #how many new animats to run before reRanking
         self.nodeNum = 8         #how many nodes on cluster
         self.maxAnimats = 1000    #how large list of parameters should be
         self.newGenSize = 100    #how many new animats to generate each iteration of evo alg
         ## NOTE when adding metrics to toTrack, make sure they are included in Simulation.filterResults
-        self.toTrack = ["Energy","AvgMove","FoodsEaten"]         #list of metrics to track
+        self.toTrack = ["Energy","FoodsEaten","FindsFood"]         #list of metrics to track
         self.animats = []         #list of simParams
         self.results = []         #all results returned from Simulation, used to rank Animats on performance
         self.nodeP2Ps = [("10.2.1." + str(i) + ":60000") for i in xrange(2,12)]     #P2P address for each node on cluste

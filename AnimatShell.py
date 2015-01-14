@@ -36,7 +36,7 @@ class Animat():
         self.direc = np.pi/2.0
         self.Eating = False #does not start eating
         self.Energy = 200
-        self.hungerThreshold = .5 * self.Energy
+        self.hungerThreshold = .75 * self.Energy
         self.maxInputStrength = np.ones(self.net.totalNum)*200.
         #self.image = pygame.image.load("roomba.png").convert_alpha()
     
@@ -156,7 +156,12 @@ class WheelAnimat(Animat):
         #print(whichFoods.size)
         if whichFoods.size > 0:
             self.Eating = 1
-            self.Energy += self.Calories * food_amt[whichFoods]
+            try:
+                 self.Energy += self.Calories * food_amt[whichFoods]
+            except ValueError:
+                 print "Eat error"
+                 print whichFoods
+                 self.Energy += self.Calories * food_amt[whichFoods][0]
             food_amt[whichFoods] -= 1.0
         else:
             self.Eating = 0 #move if not near food
