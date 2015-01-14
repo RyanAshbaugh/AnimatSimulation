@@ -5,6 +5,8 @@ Simulates brain, contains all neurons
 
 all data flow operations work correctly, just needs lots of functionality added
 
+TEST FOR BRANCH
+
 '''
 
 from NeuronModule import InhibitoryNeuron
