@@ -158,11 +158,12 @@ class WheelAnimat(Animat):
             self.Eating = 1
             try:
                  self.Energy += self.Calories * food_amt[whichFoods]
+                 food_amt[whichFoods] -= 1.0
             except ValueError:
-                 print "Eat error"
-                 print whichFoods
-                 self.Energy += self.Calories * food_amt[whichFoods][0]
-            food_amt[whichFoods] -= 1.0
+                print food_amt[whichFoods]
+                self.Energy += self.Calories * food_amt[whichFoods][0]
+                food_amt[whichFoods][0] -= 1.0
+            #food_amt[whichFoods] -= 1.0
         else:
             self.Eating = 0 #move if not near food
         #check if hungry

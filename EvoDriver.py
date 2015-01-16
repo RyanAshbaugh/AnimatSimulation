@@ -114,8 +114,8 @@ class EvoDriver():
             #build list of all results for this metric
             results = [(id,result[metric]) for id,result in self.results]
             #use simulation results to calculate max,min,mean,std so that evo performance can be tracked
-            maxResult = max(results, key= lambda x: x[1])
-            minResult = min(results, key= lambda x: x[1])
+            maxResult = max(results, key= lambda x: x[1])[1]
+            minResult = min(results, key= lambda x: x[1])[1]
             mean = np.mean(results,axis=0)[1]
             sd = np.std(results,axis=0)[1]
             for id,result in results:

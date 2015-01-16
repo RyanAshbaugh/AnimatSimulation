@@ -550,14 +550,15 @@ class GUIDriver:
         senseL = tk.Label(win,text=senseT)
         motorL = tk.Label(win,text=motorT)
         hungerL = tk.Label(win,text=hungerT)
+        descriptL = tk.Label(win,text="Blue is selected neuron, black is outgoing connection")
         excitL.place(x=100,y=300)
         #inhibL.place(x=100,y=400)
         senseL.place(x=100,y=325)
         motorL.place(x=100,y=350)
         hungerL.place(x=100,y=375)
+        descriptL.place(x=400,y=500)
         listBox.place(x=100,y=100)
         viewButton.place(x=300,y=100)
-
 
 
     def plotConnection(self,window,index):
