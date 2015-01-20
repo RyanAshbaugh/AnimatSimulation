@@ -13,7 +13,7 @@ __author__ = 'RJ'
 import spur
 import os
 import EvoDriver
-import logging
+
 
 class EvolutionaryAlgorithm:
 
@@ -40,6 +40,8 @@ class EvolutionaryAlgorithm:
             self.nodes.append((shell,process))
             print hn + " connected"
 
+
+    #close
     def closeServers(self):
         print "Terminating Servers\n"
         for shell,process in self.nodes:
@@ -51,6 +53,7 @@ class EvolutionaryAlgorithm:
         for shell,process in self.nodes: shell.run(["logout"]) #close ssh session
         print "Complete!\n"
 
+    #closes any python processes still running
     def cleanUp(self):
         print "Cleaning up\n"
         for shell,process in self.nodes:

@@ -20,29 +20,25 @@ import math
 class EvoDriver():
 
     def __init__(self, usr="lucasrh", pw="Grammercy1101grove"):
-        ## Variable Declaration
+
         #Simulation Variables
         self.IDcntr = 1          #keeps track so each animat gets unique id number
         self.worlds = []         #list of world configurations
-        #self.wSize = 20          #size of world of simulation
         self.aType = "Wheel Animat"
         self.origin = (1,0)
         self.cal = 1
-        self.inhib = [80,.02,.25,-65,2]
+        self.inhib = [80,.02,.25,-65,2] #number of and izekevich parameters
         self.excit = [320,.02,.2,-65,8]
-        #self.izekVars = [80,.02,.25,-65,2,320,.02,.2,-65,8]    #parameters for izekevich parameters
-
-        ## Set up Worlds
         fLocs1 = [(1,0),(-1,0),(0,1),(0,-1),(0,2),(0,-2),(2,0),(-2,0),(4,0),(-4,0),(0,4),(0,-4),(0,7),(7,0),(-7,0)]
         fLocs2 = [(1,1),(2,2),(3,3),(4,4),(3,5),(2,6),(1,7),(0,8),(-2,6),(-4,4),(-6,2),(-8,0),(-5,0),(-2,-3),(-5,-5)]
         fLocs3 = [(-2,2),(-1,0),(1,0),(-1,0),(2,-2),(3,5),(-5,5),(-8,8),(10,10),(-10,10),(10,-10),(0,-1),(0,-2),(0,-3),(0,-4)]
         fLocs4 = [(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(20)]
-        self.worlds.append([1,15,20,fLocs1])
+        self.worlds.append([1,15,20,fLocs1]) #number of animats,number of foods, world size, food locations
         self.worlds.append([1,15,20,fLocs2])
         self.worlds.append([1,15,20,fLocs3])
         self.worlds.append([1,20,20,fLocs4])
 
-
+        #EvoDriver Variables
         self.cycleNum = 20       #how many cycles on main loop
         self.reRankNum = 100      #how many new animats to run before reRanking
         self.nodeNum = 8         #how many nodes on cluster
@@ -50,34 +46,44 @@ class EvoDriver():
         self.newGenSize = 100    #how many new animats to generate each iteration of evo alg
         ## NOTE when adding metrics to toTrack, make sure they are included in Simulation.filterResults
         self.toTrack = ["Energy","FoodsEaten","FindsFood"]         #list of metrics to track
-        self.animats = []         #list of simParams
-        self.results = []         #all results returned from Simulation, used to rank Animats on performance
         self.nodeP2Ps = [("10.2.1." + str(i) + ":60000") for i in xrange(2,12)]     #P2P address for each node on cluste
         self.js = pp.Server(ncpus=0,ppservers=tuple(self.nodeP2Ps[0:8]))
         self.L = 3                #used for network connection probability
         self.K = 5                #used for network connectino probability
-        self.genData = []
+        self.animats = []         #list of simParams
+        self.results = []         #all results returned from Simulation, used to rank Animats on performance
+        self.genData = []         #holds max,min,mean,sd,scores of each generation
+        self.resultsHistory = []  #holds metric results from each generation
 
         ## Setup
-        print "Simulator Initializing\n"
-        self.generateParams(self.animats,self.maxAnimats)             #fill list with initial random animats
-        print "Initial Run\n"
-        self.results = self.runSims(self.animats)              #run all randomly generated animats
-        self.rankAnimats()                            #sort animats based on results
+        input = raw_input("Load data from file? (y/n): ")
+        if input == "y":
+            lastGenNum = self.loadGen()                         #load data from save file
+            self.run(genNum=lastGenNum+1)
+        else:
+            print "Simulator Initializing\n"
+            self.generateParams(self.animats,self.maxAnimats)   #fill list with initial random animats
+            print "Initial Run\n"
+            self.results = self.runSims(self.animats)           #run all randomly generated animats
+            self.rankAnimats()                                  #sort animats based on results
+            self.run()
 
-        ## Main Loop
-        for g in xrange(self.cycleNum):
+        ## Terminate
+        self.saveResults()                                      #prompts for user to save results or not
+        self.js.destroy()
+
+    #runs simulations for each generation
+    def run(self,genNum=0):
+        for g in xrange(genNum,self.cycleNum):
             print "Starting generation " + str(g+1) + " of " + str(self.cycleNum)
             #since animat list is only reRanked every x amount of times, run top x animats in parallel
             babies = self.mutate(self.animats[-self.reRankNum:]) #take top ranked animats and mutate
             self.animats = self.animats + babies
-            self.results = self.runSims(self.animats)                                 #run simulations on top animats
+            self.results = self.runSims(self.animats)            #run all animats
+            self.resultsHistory.append(self.results)             #self.results changes as animats are sorted, so keep store for later analysis
             self.rankAnimats()                                   #reRank all animats
             self.animats = self.animats[-self.maxAnimats:]       #keep only <self.maxAnimats> number of animats
-
-        self.saveResults()                                       #prompts for user to save results or not
-        self.js.destroy()
-
+            self.saveGen(g)                                      #save in case of crash/connection break
 
         #Generates initial animat parameters
     def generateParams(self,list,size,aa=-1,bb=-1):
@@ -99,9 +105,6 @@ class EvoDriver():
                 sP.setBB(1,bb)
             list.append(sP)
             self.IDcntr += 1
-
-
-
 
     # Sorts list of animats based on results from simulations
     def rankAnimats(self):
@@ -188,48 +191,54 @@ class EvoDriver():
 
     def saveResults(self):
         print "Simulation Complete\n"
-        input = raw_input("Enter 1 to save or anything else to close: ")
-        if input == "1":
-            fn = raw_input("Enter filename for animat data to run in GUI: ")
-            print "Saving top animat for use in GUI version"
-            with open(fn+'.txt','w') as f:
-                json.dump(self.animats[-1].getAnimParams(1),f)
-            print "Saving evolutionary algorithm stats"
-            printScores = raw_input("Include scores in log file? (1 if yes): ")
-            fn = raw_input("Enter filename for evo log file: ")
-            with open(fn+'_detail.txt','w') as f:
-                f.write("Animat Generation Results\n\n")
-                for i,gen in enumerate(self.genData):
-                    f.write("\n\nResults for Generation: " + str(i))
-                    for metric in gen:
-                        f.write("\n>>Metric: " + str(metric[0]))
-                        f.write("\n>>  Max Score: " + str(metric[1]))
-                        f.write("\n>>  Min Score: " + str(metric[2]))
-                        f.write("\n>>  Mean: " + str(metric[3]))
-                        f.write("\n>>  Standard Deviation: " + str(metric[4]))
-                        if printScores == '1':
-                            f.write("\n>>  Scores after ranking this metric:\n" + str(metric[5]))
-            with open(fn+'_simple.txt','w') as f:
-                f.write("Animat Generation Results - each grid is mean and SD of each metric in a generation\n\n")
-                for i,gen in enumerate(self.genData):
-                    f.write("\n" + str(i))
-                    for metric in gen: f.write("\n" + str(metric[3]) + " " + str(metric[4]))
-                    f.write("\n")
+        #input = raw_input("Enter 1 to save or anything else to close: ")
+        #if input == "1":
+        fn = raw_input("Enter filename to save results: ")
+        print "Saving top animat for use in GUI version"
+        with open(fn+'_topAnimat.txt','w') as f:
+            json.dump(self.animats[-1].getAnimParams(1),f)
+        print "Saving evolutionary algorithm stats"
+        #printScores = raw_input("Include scores in log file? (1 if yes): ")
+        #fn = raw_input("Enter filename for evo log file: ")
+        with open(fn+'_detailScores.txt','w') as f:
+            f.write("Animat Generation Results\n\n")
+            for i,gen in enumerate(self.genData):
+                f.write("\n\nResults for Generation: " + str(i))
+                for metric in gen:
+                    f.write("\n>>Metric: " + str(metric[0]))
+                    f.write("\n>>  Max Score: " + str(metric[1]))
+                    f.write("\n>>  Min Score: " + str(metric[2]))
+                    f.write("\n>>  Mean: " + str(metric[3]))
+                    f.write("\n>>  Standard Deviation: " + str(metric[4]))
+        with open(fn+'_simpleScores.txt','w') as f:
+            f.write("Animat Generation Results - each grid is mean and SD of each metric in a generation\n\n")
+            for i,gen in enumerate(self.genData):
+                f.write("\n" + str(i))
+                for metric in gen: f.write("\n" + str(metric[3]) + " " + str(metric[4]))
+                f.write("\n")
+        #save metric results
+        with open(fn+'_metricResults.txt','w') as f:
+            f.write("Animat Scores - each line is animat id and score in each metric, each grid represents a generation\n")
+            for i,gen in enumerate(self.resultsHistory):
+                f.write("\n"+str(i))
+                for animat in gen:
+                    f.write("\n"+str(animat[0]))
+                    for metric,result in animat[1]:
+                        f.write("%.4f" % result)
+                        f.write(" ")
+                f.write("\n")
 
+    # Used for saving basic generation data in order to recover simulation if error occurs or connection breaks
+    def saveGen(self,genNum):
+        data = [genNum,self.animats,self.results,self.genData,self.resultsHistory]
+        with open('gen.txt','w') as f:
+            json.dump(data,f)
 
-
-
-
-
-class evoAnimat():
-
-    def __init__(self,aa,bb,iv,id):
-        self.aa = aa
-        self.bb = bb
-        self.izekVars = iv
-        self.id = id
-        self.score = 0
-        self.results = []
+    def loadGen(self):
+        with open('gen.txt','r') as f:
+            data =  json.load(f)
+        self.animats,self.results,self.genData,self.resultsHistory = data[1:]
+        return data[0] #return gen number left off at
 
 
 
