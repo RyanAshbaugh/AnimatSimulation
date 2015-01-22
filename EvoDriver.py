@@ -83,6 +83,7 @@ class EvoDriver():
             self.resultsHistory.append(self.results)             #self.results changes as animats are sorted, so keep store for later analysis
             self.rankAnimats()                                   #reRank all animats
             self.animats = self.animats[-self.maxAnimats:]       #keep only <self.maxAnimats> number of animats
+            self.resultsHistory.append(self.results)             #self.results changes as animats are sorted, so keep store for later analysis
             self.saveGen(g)                                      #save in case of crash/connection break
 
         #Generates initial animat parameters
@@ -221,23 +222,34 @@ class EvoDriver():
             f.write("Animat Scores - each line is animat id and score in each metric, each grid represents a generation\n")
             for i,gen in enumerate(self.resultsHistory):
                 f.write("\n"+str(i))
-                for animat in gen:
-                    f.write("\n"+str(animat[0]))
-                    for metric,result in animat[1]:
-                        f.write("%.4f" % result)
+                for id,result in gen:
+                    f.write("\n"+str(id)+" ")
+                    for metric,result in result.iteritems():
+                        f.write(("%.4f" % result))
                         f.write(" ")
                 f.write("\n")
 
     # Used for saving basic generation data in order to recover simulation if error occurs or connection breaks
     def saveGen(self,genNum):
-        data = [genNum,self.animats,self.results,self.genData,self.resultsHistory]
+        animats = [anim.getAnimParams(1) for anim in self.animats]
+        data = [genNum,animats,self.results,self.genData,self.resultsHistory]
         with open('gen.txt','w') as f:
             json.dump(data,f)
 
     def loadGen(self):
         with open('gen.txt','r') as f:
             data =  json.load(f)
-        self.animats,self.results,self.genData,self.resultsHistory = data[1:]
+        animats = []
+        for anim in data[1]:
+            sP = SimParam.SimParam()
+            for j,world in enumerate(self.worlds): sP.setWorld(j+1,world[0],world[1],world[2],world[3])
+            sP.setAnimParams(1,anim[0],anim[1],anim[2],anim[3],anim[4],anim[5])
+            sP.setAA(1,anim[6])
+            sP.setBB(1,anim[7])
+            animats.append(sP)
+        self.animats = animats
+        self.IDcntr = max(animats,key= lambda x: x.getID()).getID()
+        self.results,self.genData,self.resultsHistory = data[2:]
         return data[0] #return gen number left off at
 
 
