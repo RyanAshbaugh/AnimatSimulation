@@ -26,6 +26,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from matplotlib.figure import Figure
+from matplotlib import pyplot as plt
 import time
 from TabBox import TabBox
 from VideoBar import VideoBar
@@ -537,44 +538,74 @@ class GUIDriver:
     def connectionViewer(self):
         win = tk.Toplevel(height=800,width=1100)
         win.title("Network Connection Viewer")
-        listBox = tk.Listbox(win)
-        for i in [n.index for n in self.world.animats[0].net.getNeurons()]: listBox.insert('end',i)
-        viewButton = tk.Button(win,text="View",command= lambda: self.plotConnection(win,listBox.get('active')))
-        excitT = "Excitatory Neurons: "+str(self.world.animats[0].net.excitatoryNeurons[0])+"->"+str(self.world.animats[0].net.excitatoryNeurons[-1])
-        #inhibT = "Inhibitory Neurons: "+str(self.world.animats[0].net.inhibitoryNeurons[0])+"->"+str(self.world.animats[0].net.inhibitoryNeurons[-1])
-        senseT = "Sensory Neurons: "+str(self.world.animats[0].net.senseNeurons[0])+"->"+str(self.world.animats[0].net.senseNeurons[-1])
-        motorT = "Motor Neurons: "+str(self.world.animats[0].net.motorNeurons[0])+"->"+str(self.world.animats[0].net.motorNeurons[-1])
-        hungerT = "Hunger Neurons: "+str(self.world.animats[0].net.hungerNeurons[0])+"->"+str(self.world.animats[0].net.hungerNeurons[-1])
-        excitL = tk.Label(win,text=excitT)
-        #inhibL = tk.Label(win,text=inhibT)
-        senseL = tk.Label(win,text=senseT)
-        motorL = tk.Label(win,text=motorT)
-        hungerL = tk.Label(win,text=hungerT)
-        descriptL = tk.Label(win,text="Blue is selected neuron, black is outgoing connection")
-        excitL.place(x=100,y=300)
-        #inhibL.place(x=100,y=400)
-        senseL.place(x=100,y=325)
-        motorL.place(x=100,y=350)
-        hungerL.place(x=100,y=375)
-        descriptL.place(x=400,y=500)
-        listBox.place(x=100,y=100)
-        viewButton.place(x=300,y=100)
-
-
-    def plotConnection(self,window,index):
-        neuronGraph = Graph(window, self.neuron_box.content_bounds, [-1.1, 1.1, -1.1, 1.1])
-        neuronGraph.plotCircle((2, 2), (0, 0), self.colorWhite)
+        fig = Figure(figsize=(10,10))
+        ax = fig.add_subplot(111,xlim=(-1.1,1.1),ylim=(-1.1,1.1))
+        netCircle = plt.Circle((0,0), radius = 1, fill = False )
+        ax.add_artist(netCircle)
         neurons = self.world.animats[0].net.getNeurons()
-        connections = np.nonzero(self.world.animats[0].net.S[index])[0]
-        print connections
+        locs = {} # used for storing neurons in index : location
         for neuron in neurons:
-            if neuron.index == index:
-                neuronGraph.plotCircle((.05, .05), (neuron.X, neuron.Y), '#3333FF')  #blue for target neuron
-            elif neuron.index in connections:
-                neuronGraph.plotCircle((.05, .05), (neuron.X, neuron.Y), '#000000')  #black for connecting neurons
-            else:
-                neuronGraph.plotCircle((.05, .05), (neuron.X, neuron.Y), neuron.color) #plot normal color
-        neuronGraph.draw(self.canvas)
+            ax.add_artist(plt.Circle((neuron.X,neuron.Y),radius=.025,facecolor=neuron.color,edgecolor='black'))
+            locs[neuron.index] = (neuron.X,neuron.Y)
+        for i,connectsFrom in enumerate(self.world.animats[0].net.S):
+            startLoc = locs[i]
+            cs = ""
+            if startLoc[0] < 0:
+                cs = "angle3,angleA=45,angleB=0"
+            for connectsTo in np.nonzero(connectsFrom)[0]:
+                endLoc = locs[connectsTo]
+                ax.annotate("",xy=endLoc,xytext=startLoc,size=5,
+                            arrowprops=dict(arrowstyle="simple",connectionstyle="arc3,rad=0.3",alpha=0.3))
+
+        #ax.annotate("",xy=(-1,0),xytext=(1,0),arrowprops=dict(arrowstyle="simple",connectionstyle="arc3,rad=0.3",alpha=0.3))
+
+        ##Show plot
+        canvas = FigureCanvasTkAgg(fig,master=win)
+        canvas.show()
+        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        NavigationToolbar2TkAgg(canvas,win)
+
+    # def connectionViewer(self):
+    #     win = tk.Toplevel(height=800,width=1100)
+    #     win.title("Network Connection Viewer")
+    #     listBox = tk.Listbox(win)
+    #     for i in [n.index for n in self.world.animats[0].net.getNeurons()]: listBox.insert('end',i)
+    #     viewButton = tk.Button(win,text="View",command= lambda: self.plotConnection(win,listBox.get('active')))
+    #     excitT = "Excitatory Neurons: "+str(self.world.animats[0].net.excitatoryNeurons[0])+"->"+str(self.world.animats[0].net.excitatoryNeurons[-1])
+    #     #inhibT = "Inhibitory Neurons: "+str(self.world.animats[0].net.inhibitoryNeurons[0])+"->"+str(self.world.animats[0].net.inhibitoryNeurons[-1])
+    #     senseT = "Sensory Neurons: "+str(self.world.animats[0].net.senseNeurons[0])+"->"+str(self.world.animats[0].net.senseNeurons[-1])
+    #     motorT = "Motor Neurons: "+str(self.world.animats[0].net.motorNeurons[0])+"->"+str(self.world.animats[0].net.motorNeurons[-1])
+    #     hungerT = "Hunger Neurons: "+str(self.world.animats[0].net.hungerNeurons[0])+"->"+str(self.world.animats[0].net.hungerNeurons[-1])
+    #     excitL = tk.Label(win,text=excitT)
+    #     #inhibL = tk.Label(win,text=inhibT)
+    #     senseL = tk.Label(win,text=senseT)
+    #     motorL = tk.Label(win,text=motorT)
+    #     hungerL = tk.Label(win,text=hungerT)
+    #     descriptL = tk.Label(win,text="Blue is selected neuron, black is outgoing connection")
+    #     excitL.place(x=100,y=300)
+    #     #inhibL.place(x=100,y=400)
+    #     senseL.place(x=100,y=325)
+    #     motorL.place(x=100,y=350)
+    #     hungerL.place(x=100,y=375)
+    #     descriptL.place(x=400,y=500)
+    #     listBox.place(x=100,y=100)
+    #     viewButton.place(x=300,y=100)
+    #
+    #
+    # def plotConnection(self,window,index):
+    #     neuronGraph = Graph(window, self.neuron_box.content_bounds, [-1.1, 1.1, -1.1, 1.1])
+    #     neuronGraph.plotCircle((2, 2), (0, 0), self.colorWhite)
+    #     neurons = self.world.animats[0].net.getNeurons()
+    #     connections = np.nonzero(self.world.animats[0].net.S[index])[0]
+    #     print connections
+    #     for neuron in neurons:
+    #         if neuron.index == index:
+    #             neuronGraph.plotCircle((.05, .05), (neuron.X, neuron.Y), '#3333FF')  #blue for target neuron
+    #         elif neuron.index in connections:
+    #             neuronGraph.plotCircle((.05, .05), (neuron.X, neuron.Y), '#000000')  #black for connecting neurons
+    #         else:
+    #             neuronGraph.plotCircle((.05, .05), (neuron.X, neuron.Y), neuron.color) #plot normal color
+    #     neuronGraph.draw(self.canvas)
 
 
     def showDevWin(self):
