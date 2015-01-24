@@ -152,7 +152,7 @@ class Simulation():
 
     #returns number of foods eaten by animat
     def foodsEaten(self):
-        return len(self.simHistory[-1][1].getFood()) - len(np.nonzero(self.simHistory[-1][1].getFood()))
+        return len(self.simHistory[-1][1].getFood()) - len(np.nonzero(self.simHistory[-1][1].getFood())[0])
 
     #returns list of tuples of (time,energy)
     def getNrg(self):
@@ -166,7 +166,7 @@ class Simulation():
         initNrg = self.simHistory[0][1].getEnergy()       #get initial energy from first state
         prevDist = self.minFoodDist(self.simHistory[0][1])#find initial distance
         for t,s in self.simHistory[1:]:
-            if s.getEnergy < (.5*initNrg):
+            if s.getEnergy() < (.5*initNrg):
                 newDist = self.minFoodDist(s)
                 if newDist < prevDist: score += np.abs(prevDist-newDist)
                 #else: score -= np.abs(prevDist-newDist)

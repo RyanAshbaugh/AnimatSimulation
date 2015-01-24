@@ -356,19 +356,18 @@ class DevelopmentWindow():
 
     #NEED TO IMPLEMENT AFTER
     def loadEvo(self):
-        pass
-        # fn = tkFileDialog.askopenfilename()
-        # with open(fn,'r') as f:
-        #     evoParams =  json.load(f)
-        # print evoParams
-        # self.animatParams[0].append(evoParams[0])  #load aa
-        # self.animatParams[0].append(evoParams[1])  #load bb
-        # self.animatParams[0][3] = evoParams[2][0:5]#load inhib params
-        # self.animatParams[0][4] = evoParams[2][5:] #load excit params
-        # self.simWin = tk.Toplevel(self.root)
-        # self.root.withdraw()
-        # self.simEngine.stopSimulation()
-        # self.gui = GUIdriver.GUIDriver(self.simWin,self.root,self.parameters,self.animatParams)
+        #pass
+        fn = tkFileDialog.askopenfilename()
+        with open(fn,'r') as f:
+            evoParams =  json.load(f)
+        print evoParams
+        self.sP.setAnimParams(1,1,evoParams[1],evoParams[2],evoParams[3],evoParams[4],evoParams[5])
+        self.sP.setAA(1,evoParams[6])
+        self.sP.setBB(1,evoParams[7])
+        self.simWin = tk.Toplevel(self.root)
+        self.root.withdraw()
+        self.simEngine.stopSimulation()
+        self.gui = GUIdriver.GUIDriver(self.simWin,self.root,self.sP)
 
     def editParameters(self):
         paramWin = ParametersWindow.ParameterWindow()

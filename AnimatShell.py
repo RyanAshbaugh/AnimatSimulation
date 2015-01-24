@@ -151,18 +151,17 @@ class WheelAnimat(Animat):
         food_amt = foods[1][1]
 
         food_dist = scipy.spatial.distance.cdist(np.array([self.pos]), food_loc)
-        whichFoods = np.logical_and(food_dist[0] < .5, food_amt > 0).nonzero()[0]
+        whichFoods = np.logical_and(food_dist[0] < .5, food_amt > 0).nonzero()[0]  #this [0] is b/c nonzero returns list
 
         #print(whichFoods.size)
         if whichFoods.size > 0:
             self.Eating = 1
             try:
                  self.Energy += self.Calories * food_amt[whichFoods]
+                 food_amt[whichFoods] -= 1.0
             except ValueError:
-                 print "Eat error"
-                 print whichFoods
-                 self.Energy += self.Calories * food_amt[whichFoods][0]
-            food_amt[whichFoods] -= 1.0
+                self.Energy += self.Calories * food_amt[whichFoods][0]  #if two foods selected choose first
+                food_amt[whichFoods][0] -= 1.0
         else:
             self.Eating = 0 #move if not near food
         #check if hungry
@@ -170,9 +169,6 @@ class WheelAnimat(Animat):
             self.net.I[self.net.hungerNeurons] = 105  #-65->30 = 95 + 10 = 105
         return food_amt
 
-
-
-            
     def getStats(self):
         #stat list = Type,Energy,
         stats = ["Wheel Animat"]
