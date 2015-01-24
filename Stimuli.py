@@ -25,19 +25,36 @@ class Stimulus():
 
 ##################### Food CLass ######################################################
                  ## Basic food object ##
-    
-class Food(Stimulus):
-    
-    #constructor
-    #**kwargs
-    #  loc : takes (x,y) coordinate for starting position
-    #  smell : sets smell potency? not sure if this is needed yet, just putting here
-    #  amount : initial "amount" of food
-    def __init__(self, loc = (0,0), smell = 1.0, amount = 10.0, cal = 1):
+
+class GoodFood(Stimulus):
+
+    def __init__(self,loc,amount=10.0):
         Stimulus.__init__(self,startPos = loc)
         self.amt = amount
-        self.smellStr = smell
-        self.calories = cal
+        self.smellStr = 5
+        self.calories = 10
+        self.image = "apple.png"
+
+    def getAmount(self):
+        return self.amt
+
+    def getSmell(self):
+        return (self.amt * self.smellStr)/10.0  #divide by 10 to scale down to appropriate levels for network
+
+    def getCalories(self):
+        return self.calories
+
+    def decrAmt(self):
+        self.amt -= 1.0
+
+class BadFood(Stimulus):
+
+    def __init__(self,loc,amount=10.0):
+        Stimulus.__init__(self,startPos = loc)
+        self.amt = amount
+        self.smellStr = 1
+        self.calories = 5
+        self.image = "beer.png"
 
     def getAmount(self):
         return self.amt

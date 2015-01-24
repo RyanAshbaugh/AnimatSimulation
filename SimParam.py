@@ -35,6 +35,7 @@ class SimParam():
     def setFoodLocs(self,id,locs):
         self.worldParams[id] = (self.worldParams[0],self.worldParams[1],self.worldParams[2],locs)
 
+
     def getWorldNum(self):
         return len(self.worldParams)
 

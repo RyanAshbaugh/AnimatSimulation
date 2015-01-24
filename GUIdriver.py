@@ -278,8 +278,9 @@ class GUIDriver:
                     neuronGraph.plotCircle((.05, .05), (neuron.X, neuron.Y), neuron.firing_color if neuron.isFiring() else neuron.color)
                 neuronGraph.draw(self.canvas)
 
-            foodImage = self.worldGraph.size_up(self.foodImage, (1,1), 0)
+
             for food in self.world.foods:
+                foodImage = self.worldGraph.size_up(Image.open(food.image), (1,1), 0)
                 if food.amt > 0.0:
                     self.worldGraph.plotImage(foodImage, (1, 1), food.pos)
                 #self.worldGraph.plotCircle((1,1), food.pos, self.colorGreen)
