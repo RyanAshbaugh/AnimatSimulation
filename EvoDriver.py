@@ -54,6 +54,7 @@ class EvoDriver():
         self.results = []         #all results returned from Simulation, used to rank Animats on performance
         self.genData = []         #holds max,min,mean,sd,scores of each generation
         self.resultsHistory = []  #holds metric results from each generation
+        self.animatHistory = []   #holds animat parameter configuration from each generation
 
         ## Setup
         input = raw_input("Load data from file? (y/n): ")
@@ -84,6 +85,7 @@ class EvoDriver():
             self.rankAnimats()                                   #reRank all animats
             self.animats = self.animats[-self.maxAnimats:]       #keep only <self.maxAnimats> number of animats
             self.resultsHistory.append(self.results)             #self.results changes as animats are sorted, so keep store for later analysis
+            self.animatHistory.append(self.animats)              #save animats
             self.saveGen(g)                                      #save in case of crash/connection break
 
         #Generates initial animat parameters
@@ -228,6 +230,29 @@ class EvoDriver():
                         f.write(("%.4f" % result))
                         f.write(" ")
                 f.write("\n")
+        with open(fn+'_animatParameters.txt','w') as f:
+            f.write("Animat Parameters - each grid is single generation in following configuration:\n")
+            f.write("\nGen\nid\naa aa aa aa aa\naa aa aa aa aa\naa aa aa aa aa\n")
+            f.write("bb bb bb bb bb\nbb bb bb bb bb\nbb bb bb bb bb\n\n")
+            for i,gen in enumerate(self.animatHistory):
+                f.write("\n"+str(i+1)+"\n")
+                for anim in gen:
+                    id,aa,bb = anim.getID(1), anim.getAA(1), anim.getBB(1)   #1 is animat id inside SimParam
+                    f.write(str(id)+"\n")
+                    for row in aa:
+                        for val in row:
+                            f.write(("%.4f" % val))
+                            f.write(" ")
+                        f.write("\n")
+                    for row in bb:
+                        for val in row:
+                            f.write(("%.4f" % val))
+                            f.write(" ")
+                        f.write("\n")
+                    f.write("\n")
+                f.write("\n")
+
+
 
     # Used for saving basic generation data in order to recover simulation if error occurs or connection breaks
     def saveGen(self,genNum):
