@@ -39,13 +39,13 @@ class EvoDriver():
         self.worlds.append([1,20,20,fLocs4])
 
         #EvoDriver Variables
-        self.cycleNum = 20       #how many cycles on main loop
+        self.cycleNum = 10       #how many cycles on main loop
         self.reRankNum = 100      #how many new animats to run before reRanking
         self.nodeNum = 8         #how many nodes on cluster
         self.maxAnimats = 1000    #how large list of parameters should be
         self.newGenSize = 100    #how many new animats to generate each iteration of evo alg
         ## NOTE when adding metrics to toTrack, make sure they are included in Simulation.filterResults
-        self.toTrack = ["Energy","FoodsEaten","FindsFood"]         #list of metrics to track
+        self.toTrack = ["Energy","FoodsEaten","FindsFood","NetworkDensity","FiringRate"]  #list of metrics to track
         self.nodeP2Ps = [("10.2.1." + str(i) + ":60000") for i in xrange(2,12)]     #P2P address for each node on cluste
         self.js = pp.Server(ncpus=0,ppservers=tuple(self.nodeP2Ps[0:8]))
         self.L = 3                #used for network connection probability
@@ -84,7 +84,6 @@ class EvoDriver():
             self.resultsHistory.append(self.results)             #self.results changes as animats are sorted, so keep store for later analysis
             self.rankAnimats()                                   #reRank all animats
             self.animats = self.animats[-self.maxAnimats:]       #keep only <self.maxAnimats> number of animats
-            self.resultsHistory.append(self.results)             #self.results changes as animats are sorted, so keep store for later analysis
             self.animatHistory.append(self.animats)              #save animats
             self.saveGen(g)                                      #save in case of crash/connection break
 
@@ -126,9 +125,15 @@ class EvoDriver():
             sd = np.std(results,axis=0)[1]
             for id,result in results:
                 try:
-                    scores[id] += (result-mean)/sd    #score is sum of z scores for all metrics
+                    if (metric == "NetworkDensity") or (metric == "FiringRate"):
+                        scores[id] += ((result-mean)/sd)*(-1.0)  #These metrics should dock points
+                    else:
+                        scores[id] += (result-mean)/sd    #score is sum of z scores for all metrics
                 except KeyError:                  #KeyError when score updated for first time, so catch and set
-                    scores[id] = (result-mean)/sd
+                    if (metric == "NetworkDensity") or (metric == "FiringRate"):
+                        scores[id] = ((result-mean)/sd)*(-1.0)  #These metrics should dock points
+                    else:
+                        scores[id] = (result-mean)/sd    #score is sum of z scores for all metrics
             genData.append((metric,maxResult,minResult,mean,sd,scores))
         #sort animats based on scores
         self.animats = self.sortByScores(scores)
@@ -273,7 +278,7 @@ class EvoDriver():
             sP.setBB(1,anim[7])
             animats.append(sP)
         self.animats = animats
-        self.IDcntr = max(animats,key= lambda x: x.getID()).getID()
+        self.IDcntr = max(animats,key= lambda x: x.getID(1)).getID(1)
         self.results,self.genData,self.resultsHistory = data[2:]
         return data[0] #return gen number left off at
 

@@ -148,6 +148,8 @@ class Simulation():
         if "FindsFood" in metrics: temp["FindsFood"] = self.findsFood()
         if "AvgMove" in metrics: temp["AvgMove"] = self.avgMove()
         if "FoodsEaten" in metrics: temp["FoodsEaten"] = self.foodsEaten()
+        if "NetworkDensity" in metrics: temp["NetworkDensity"] = self.networkDensity()
+        if "FiringRate" in metrics: temp["FiringRate"] = self.firingRate()
         return temp
 
     #returns number of foods eaten by animat
@@ -196,7 +198,27 @@ class Simulation():
             prevDist = x2,y2
         return np.average(dists)
 
+    #returns number of connections for non predefined connections (no sense,motor neuron connections)
+    def networkDensity(self):
+        connectionNum = np.nonzero(self.simHistory[0][1].getS())[0].size  #get overall connection num
+        #HACK should be able to pull number of each type of neuron, not hardcoded
+        connectionNum -= 120   #100 connections for sensory neurons, 20 for motor neurons
+        return connectionNum
 
+    #returns avg firing rate per second
+    def firingRate(self):
+        sps = 1000/self.writeInterval  #find number of states saved per second of simulated time
+        time = self.runTime/1000       #get total number of seconds
+        fps = []                       #holds total number of firings in each second
+        cntr = 0
+        for sec in xrange(time):
+            numFirings = 0
+            for state in xrange(sps):
+                state = self.simHistory[cntr][1]                     #pull state
+                numFirings += (state.getV() >= 30).nonzero()[0].size #find number of neurons fired
+                cntr += 1
+            fps.append(numFirings)
+        return np.average(fps)
 
 
     def printStartupInfo(self):
