@@ -146,7 +146,7 @@ class Simulation():
         temp = {}        #dictionary of results
         if "Energy" in metrics: temp["Energy"] = self.getNrg()
         if "FindsFood" in metrics: temp["FindsFood"] = self.findsFood()
-        if "AvgMove" in metrics: temp["AvgMove"] = self.avgMove()
+        if "TotalMove" in metrics: temp["TotalMove"] = self.totalMove()
         if "FoodsEaten" in metrics: temp["FoodsEaten"] = self.foodsEaten()
         if "NetworkDensity" in metrics: temp["NetworkDensity"] = self.networkDensity()
         if "FiringRate" in metrics: temp["FiringRate"] = self.firingRate()
@@ -171,6 +171,7 @@ class Simulation():
             if s.getEnergy() < (.5*initNrg):
                 newDist = self.minFoodDist(s)
                 if newDist < prevDist: score += np.abs(prevDist-newDist)
+                else: score -= np.abs(prevDist-newDist)
                 #else: score -= np.abs(prevDist-newDist)
                 prevDist = newDist
         return score
@@ -187,8 +188,7 @@ class Simulation():
         return np.min(dists)
 
     #returns average movement
-    def avgMove(self):
-        score = 0.0
+    def totalMove(self):
         prevDist = self.simHistory[0][1].getPos()
         dists = []
         for t,s in self.simHistory[1:]:
@@ -196,7 +196,7 @@ class Simulation():
             x2,y2 = s.getPos()
             dists.append(np.sqrt(np.square(x2-x1)+np.square(y2-y1)))
             prevDist = x2,y2
-        return np.average(dists)
+        return np.sum(dists)
 
     #returns number of connections for non predefined connections (no sense,motor neuron connections)
     def networkDensity(self):
@@ -219,6 +219,7 @@ class Simulation():
                 cntr += 1
             fps.append(numFirings)
         return np.average(fps)
+
 
 
     def printStartupInfo(self):
