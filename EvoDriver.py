@@ -32,20 +32,22 @@ class EvoDriver():
         fLocs1 = [(1,0),(-1,0),(0,1),(0,-1),(0,2),(0,-2),(2,0),(-2,0),(4,0),(-4,0),(0,4),(0,-4),(0,7),(7,0),(-7,0)]
         fLocs2 = [(1,1),(2,2),(3,3),(4,4),(3,5),(2,6),(1,7),(0,8),(-2,6),(-4,4),(-6,2),(-8,0),(-5,0),(-2,-3),(-5,-5)]
         fLocs3 = [(-2,2),(-1,0),(1,0),(-1,0),(2,-2),(3,5),(-5,5),(-8,8),(10,10),(-10,10),(10,-10),(0,-1),(0,-2),(0,-3),(0,-4)]
-        fLocs4 = [(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(20)]
+        #fLocs4 = [(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(20)]
+        #fLocs5 = [(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(20)]
         self.worlds.append([1,15,20,fLocs1]) #number of animats,number of foods, world size, food locations
         self.worlds.append([1,15,20,fLocs2])
         self.worlds.append([1,15,20,fLocs3])
-        self.worlds.append([1,20,20,fLocs4])
+        #self.worlds.append([1,20,20,fLocs4])
+        #self.worlds.append([1,20,20,fLocs5])
 
         #EvoDriver Variables
-        self.cycleNum = 20       #how many cycles on main loop
+        self.cycleNum = 10       #how many cycles on main loop
         self.reRankNum = 100      #how many new animats to run before reRanking
         self.nodeNum = 8         #how many nodes on cluster
         self.maxAnimats = 1000    #how large list of parameters should be
         self.newGenSize = 100    #how many new animats to generate each iteration of evo alg
         ## NOTE when adding metrics to toTrack, make sure they are included in Simulation.filterResults
-        self.toTrack = ["Energy","FoodsEaten","FindsFood"]         #list of metrics to track
+        self.toTrack = ["Energy","FoodsEaten","FindsFood","NetworkDensity","FiringRate","TotalMove"]  #list of metrics to track
         self.nodeP2Ps = [("10.2.1." + str(i) + ":60000") for i in xrange(2,12)]     #P2P address for each node on cluste
         self.js = pp.Server(ncpus=0,ppservers=tuple(self.nodeP2Ps[0:8]))
         self.L = 3                #used for network connection probability
@@ -54,6 +56,7 @@ class EvoDriver():
         self.results = []         #all results returned from Simulation, used to rank Animats on performance
         self.genData = []         #holds max,min,mean,sd,scores of each generation
         self.resultsHistory = []  #holds metric results from each generation
+        self.animatHistory = []   #holds animat parameter configuration from each generation
 
         ## Setup
         input = raw_input("Load data from file? (y/n): ")
@@ -78,12 +81,13 @@ class EvoDriver():
             print "Starting generation " + str(g+1) + " of " + str(self.cycleNum)
             #since animat list is only reRanked every x amount of times, run top x animats in parallel
             babies = self.mutate(self.animats[-self.reRankNum:]) #take top ranked animats and mutate
+            self.randomizeWorlds(self.animats)                   #make sure random worlds change each generation
             self.animats = self.animats + babies
             self.results = self.runSims(self.animats)            #run all animats
             self.resultsHistory.append(self.results)             #self.results changes as animats are sorted, so keep store for later analysis
             self.rankAnimats()                                   #reRank all animats
             self.animats = self.animats[-self.maxAnimats:]       #keep only <self.maxAnimats> number of animats
-            self.resultsHistory.append(self.results)             #self.results changes as animats are sorted, so keep store for later analysis
+            self.animatHistory.append(self.animats)              #save animats
             self.saveGen(g)                                      #save in case of crash/connection break
 
         #Generates initial animat parameters
@@ -92,6 +96,8 @@ class EvoDriver():
         for i in xrange(size):
             sP = SimParam.SimParam()
             for j,world in enumerate(self.worlds): sP.setWorld(j+1,world[0],world[1],world[2],world[3])
+            sP.setWorld(4,1,15,20,[(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(15)])
+            sP.setWorld(5,1,15,20,[(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(15)])
             sP.setAnimParams(1,self.IDcntr,self.aType,self.origin,self.cal,self.inhib,self.excit)
             if aa == -1:
                 aa = [[np.random.laplace()*.25 for x in xrange(self.K)] for x in xrange(self.L)] #create LxK arrays
@@ -124,9 +130,16 @@ class EvoDriver():
             sd = np.std(results,axis=0)[1]
             for id,result in results:
                 try:
-                    scores[id] += (result-mean)/sd    #score is sum of z scores for all metrics
-                except KeyError:                  #KeyError when score updated for first time, so catch and set
-                    scores[id] = (result-mean)/sd
+                    if metric == "TotalMove": pass               #Total movement is recorded but not used to rank animats
+                    elif (metric == "NetworkDensity") or (metric == "FiringRate"):
+                        scores[id] += ((result-mean)/sd)*(-1.0)  #These metrics should dock points
+                    else:
+                        scores[id] += (result-mean)/sd           #score is sum of z scores for all metrics
+                except KeyError:                                 #KeyError when score updated for first time, so catch and set
+                    if (metric == "NetworkDensity") or (metric == "FiringRate"):
+                        scores[id] = ((result-mean)/sd)*(-1.0)   #These metrics should dock points
+                    else:
+                        scores[id] = (result-mean)/sd            #score is sum of z scores for all metrics
             genData.append((metric,maxResult,minResult,mean,sd,scores))
         #sort animats based on scores
         self.animats = self.sortByScores(scores)
@@ -190,6 +203,12 @@ class EvoDriver():
         #js.wait()
         #js.destroy()
 
+    #recomputes random world food location, so it isnt the same every generation
+    def randomizeWorlds(self,animats):
+        for sP in animats:
+            sP.setWorld(4,1,15,20,[(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(15)])
+            sP.setWorld(5,1,15,20,[(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(15)])
+
     def saveResults(self):
         print "Simulation Complete\n"
         #input = raw_input("Enter 1 to save or anything else to close: ")
@@ -228,11 +247,33 @@ class EvoDriver():
                         f.write(("%.4f" % result))
                         f.write(" ")
                 f.write("\n")
+        with open(fn+'_animatParameters.txt','w') as f:
+            f.write("Animat Parameters - each grid is single generation in following configuration:\n")
+            f.write("aa and bb are " + str(self.L) + " x " + str(self.K) + "\n\n")
+            f.write("\nGen\nid aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa ")
+            f.write("bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb\n\n")
+            for i,gen in enumerate(self.animatHistory):
+                f.write("\n"+str(i+1)+"\n")
+                for anim in gen:
+                    id,aa,bb = anim.getID(1), anim.getAA(1), anim.getBB(1)   #1 is animat id inside SimParam
+                    f.write(str(id)+"\n")
+                    for row in aa:
+                        for val in row:
+                            f.write(("%.4f" % val))
+                            f.write(" ")
+                    for row in bb:
+                        for val in row:
+                            f.write(("%.4f" % val))
+                            f.write(" ")
+                    f.write("\n")
+                f.write("\n")
+
+
 
     # Used for saving basic generation data in order to recover simulation if error occurs or connection breaks
     def saveGen(self,genNum):
         animats = [anim.getAnimParams(1) for anim in self.animats]
-        data = [genNum,animats,self.results,self.genData,self.resultsHistory]
+        data = [genNum,animats,self.results,self.genData,self.resultsHistory,self.animatHistory]
         with open('gen.txt','w') as f:
             json.dump(data,f)
 
@@ -248,8 +289,8 @@ class EvoDriver():
             sP.setBB(1,anim[7])
             animats.append(sP)
         self.animats = animats
-        self.IDcntr = max(animats,key= lambda x: x.getID()).getID()
-        self.results,self.genData,self.resultsHistory = data[2:]
+        self.IDcntr = max(animats,key= lambda x: x.getID(1)).getID(1)
+        self.results,self.genData,self.resultsHistory,self.animatHistory = data[2:]
         return data[0] #return gen number left off at
 
 

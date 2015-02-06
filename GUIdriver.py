@@ -116,11 +116,14 @@ class GUIDriver:
         trackmenu.invoke(2)
         trackmenu.invoke(3)
         self.menubar.add_cascade(label="Track", menu = trackmenu)
-        self.root.config(menu=self.menubar)
         viewMenu = tk.Menu(self.menubar, tearoff=0)
         viewMenu.add_command(label="Internal Variables",command=self.varViewer)
         viewMenu.add_command(label="Connection Viewer",command=self.connectionViewer)
         self.menubar.add_cascade(label="View",menu=viewMenu)
+        debugMenu = tk.Menu(self.menubar, tearoff=0)
+        debugMenu.add_command(label="Print S",command = self.printS)
+        self.menubar.add_cascade(label="Debug",menu=debugMenu)
+        self.root.config(menu=self.menubar)
 
         #initialize the graphs and video control bar
         self.worldGraph = Graph(self.root, [100, 50, 500, 475], [-10, 10, -10, 10])
@@ -566,6 +569,15 @@ class GUIDriver:
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         NavigationToolbar2TkAgg(canvas,win)
 
+<<<<<<< HEAD
+=======
+    #Used for debug, prints value of S to terminal
+    def printS(self):
+        S = self.world.animats[0].net.S
+        print "S: \n"
+        for row in S:
+            print row
+>>>>>>> master
 
 
     def showDevWin(self):
