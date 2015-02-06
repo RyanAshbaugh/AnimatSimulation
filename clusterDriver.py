@@ -77,7 +77,7 @@ class EvoClusterDriver():
 
     def initializeSims(self):
         for i,sP in enumerate(self.simParams):
-            self.sims.append(Simulation(self.id,i,sP,90000,writeInterval=25,evo=True))
+            self.sims.append(Simulation(self.id,i,sP,60000,writeInterval=25,evo=True))
 
     def startNode(self):
         print "Node " + str(self.id) + " starting"

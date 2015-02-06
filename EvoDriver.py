@@ -32,13 +32,13 @@ class EvoDriver():
         fLocs1 = [(1,0),(-1,0),(0,1),(0,-1),(0,2),(0,-2),(2,0),(-2,0),(4,0),(-4,0),(0,4),(0,-4),(0,7),(7,0),(-7,0)]
         fLocs2 = [(1,1),(2,2),(3,3),(4,4),(3,5),(2,6),(1,7),(0,8),(-2,6),(-4,4),(-6,2),(-8,0),(-5,0),(-2,-3),(-5,-5)]
         fLocs3 = [(-2,2),(-1,0),(1,0),(-1,0),(2,-2),(3,5),(-5,5),(-8,8),(10,10),(-10,10),(10,-10),(0,-1),(0,-2),(0,-3),(0,-4)]
-        fLocs4 = [(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(20)]
-        fLocs5 = [(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(20)]
+        #fLocs4 = [(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(20)]
+        #fLocs5 = [(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(20)]
         self.worlds.append([1,15,20,fLocs1]) #number of animats,number of foods, world size, food locations
         self.worlds.append([1,15,20,fLocs2])
         self.worlds.append([1,15,20,fLocs3])
-        self.worlds.append([1,20,20,fLocs4])
-        self.worlds.append([1,20,20,fLocs5])
+        #self.worlds.append([1,20,20,fLocs4])
+        #self.worlds.append([1,20,20,fLocs5])
 
         #EvoDriver Variables
         self.cycleNum = 10       #how many cycles on main loop
@@ -81,6 +81,7 @@ class EvoDriver():
             print "Starting generation " + str(g+1) + " of " + str(self.cycleNum)
             #since animat list is only reRanked every x amount of times, run top x animats in parallel
             babies = self.mutate(self.animats[-self.reRankNum:]) #take top ranked animats and mutate
+            self.randomizeWorlds(self.animats)                   #make sure random worlds change each generation
             self.animats = self.animats + babies
             self.results = self.runSims(self.animats)            #run all animats
             self.resultsHistory.append(self.results)             #self.results changes as animats are sorted, so keep store for later analysis
@@ -95,6 +96,8 @@ class EvoDriver():
         for i in xrange(size):
             sP = SimParam.SimParam()
             for j,world in enumerate(self.worlds): sP.setWorld(j+1,world[0],world[1],world[2],world[3])
+            sP.setWorld(4,1,15,20,[(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(15)])
+            sP.setWorld(5,1,15,20,[(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(15)])
             sP.setAnimParams(1,self.IDcntr,self.aType,self.origin,self.cal,self.inhib,self.excit)
             if aa == -1:
                 aa = [[np.random.laplace()*.25 for x in xrange(self.K)] for x in xrange(self.L)] #create LxK arrays
@@ -199,6 +202,12 @@ class EvoDriver():
         #for nd in nodeDrivers: self.results += nd.getResults()    #get results and store
         #js.wait()
         #js.destroy()
+
+    #recomputes random world food location, so it isnt the same every generation
+    def randomizeWorlds(self,animats):
+        for sP in animats:
+            sP.setWorld(4,1,15,20,[(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(15)])
+            sP.setWorld(5,1,15,20,[(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(15)])
 
     def saveResults(self):
         print "Simulation Complete\n"
