@@ -33,7 +33,7 @@ class GoodFood(Stimulus):
         self.amt = amount
         self.smellStr = 5
         self.calories = 10
-        self.image = "apple.png"
+        self.image = "apple_bunch.png"
 
     def getAmount(self):
         return self.amt
@@ -54,7 +54,7 @@ class BadFood(Stimulus):
         self.amt = amount
         self.smellStr = 1
         self.calories = 5
-        self.image = "beer.png"
+        self.image = "apple.png"
 
     def getAmount(self):
         return self.amt

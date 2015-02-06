@@ -569,15 +569,13 @@ class GUIDriver:
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         NavigationToolbar2TkAgg(canvas,win)
 
-<<<<<<< HEAD
-=======
+
     #Used for debug, prints value of S to terminal
     def printS(self):
         S = self.world.animats[0].net.S
         print "S: \n"
         for row in S:
             print row
->>>>>>> master
 
 
     def showDevWin(self):
