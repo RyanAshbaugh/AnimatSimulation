@@ -106,7 +106,7 @@ class WheelAnimat(Animat):
 
         # rotate body depending on the difference (hopefully small) of two motors along direction of travel
         self.direc = self.direc + math.atan(trac*(self.motors[1]-self.motors[0])/self.radius)
-        #self.unwind() #the angle direc could exceed 2*pi and 'wind up'
+        self.unwind() #the angle direc could exceed 2*pi and 'wind up'
         self.determineMotion(trac)
         self.Energy = self.Energy - self.cMotionEnergy * self.motors.sum(axis=0) - self.kBasalEnergy
 

@@ -16,6 +16,7 @@ import json
 import SimParam
 import operator
 import math
+import cPickle
 
 class EvoDriver():
 
@@ -243,8 +244,8 @@ class EvoDriver():
                 f.write("\n"+str(i))
                 for id,result in gen:
                     f.write("\n"+str(id)+" ")
-                    for metric,result in result.iteritems():
-                        f.write(("%.4f" % result))
+                    for metric in self.toTrack:
+                        f.write(("%.4f" % result[metric]))
                         f.write(" ")
                 f.write("\n")
         with open(fn+'_animatParameters.txt','w') as f:
@@ -256,7 +257,7 @@ class EvoDriver():
                 f.write("\n"+str(i+1)+"\n")
                 for anim in gen:
                     id,aa,bb = anim.getID(1), anim.getAA(1), anim.getBB(1)   #1 is animat id inside SimParam
-                    f.write(str(id)+"\n")
+                    f.write(str(id)+" ")
                     for row in aa:
                         for val in row:
                             f.write(("%.4f" % val))
@@ -272,25 +273,33 @@ class EvoDriver():
 
     # Used for saving basic generation data in order to recover simulation if error occurs or connection breaks
     def saveGen(self,genNum):
-        animats = [anim.getAnimParams(1) for anim in self.animats]
-        data = [genNum,animats,self.results,self.genData,self.resultsHistory,self.animatHistory]
+        # animats = [anim.getAnimParams(1) for anim in self.animats]
+        # animatHist = [[anim.getAnimParams(1) for anim in gen] for gen in self.animatHistory]
+        # data = [genNum,animats,animatHist,self.results,self.genData,self.resultsHistory]
+        # with open('gen.txt','w') as f:
+        #     json.dump(data,f)
         with open('gen.txt','w') as f:
-            json.dump(data,f)
+            cPickle.dump((genNum,self.animats,self.animatHistory,self.results,self.genData,self.resultsHistory),f)
 
     def loadGen(self):
+        # with open('gen.txt','r') as f:
+        #     data =  json.load(f)
+        # #Rebuild animat list
+        # animats = []
+        # for anim in data[1]:
+        #     sP = SimParam.SimParam()
+        #     for j,world in enumerate(self.worlds): sP.setWorld(j+1,world[0],world[1],world[2],world[3])
+        #     sP.setAnimParams(1,anim[0],anim[1],anim[2],anim[3],anim[4],anim[5])
+        #     sP.setAA(1,anim[6])
+        #     sP.setBB(1,anim[7])
+        #     animats.append(sP)
+        # self.animats = animats
+        # self.IDcntr = max(animats,key= lambda x: x.getID(1)).getID(1)
+        #
+        # self.results,self.genData,self.resultsHistory,self.animatHistory = data[3:]
         with open('gen.txt','r') as f:
-            data =  json.load(f)
-        animats = []
-        for anim in data[1]:
-            sP = SimParam.SimParam()
-            for j,world in enumerate(self.worlds): sP.setWorld(j+1,world[0],world[1],world[2],world[3])
-            sP.setAnimParams(1,anim[0],anim[1],anim[2],anim[3],anim[4],anim[5])
-            sP.setAA(1,anim[6])
-            sP.setBB(1,anim[7])
-            animats.append(sP)
-        self.animats = animats
-        self.IDcntr = max(animats,key= lambda x: x.getID(1)).getID(1)
-        self.results,self.genData,self.resultsHistory,self.animatHistory = data[2:]
+             data =  cPickle.load(f)
+        self.animats,self.animatHistory,self.results,self.genData,self.resultsHistory = data[1:]
         return data[0] #return gen number left off at
 
 
