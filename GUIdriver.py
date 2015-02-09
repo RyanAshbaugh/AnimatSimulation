@@ -102,8 +102,17 @@ class GUIDriver:
         speedmenu.add_radiobutton(label="1s", variable = speedCheckVar, command=lambda:self.setWriteInterval(1000))
         speedmenu.add_radiobutton(label="Do not write", variable = speedCheckVar)
         speedmenu.invoke(1)   #default write interval is 100
+        worldmenu = tk.Menu(self.menubar, tearoff=0)
+        worldVar = tk.IntVar()    #not used just required
+        worldmenu.add_radiobutton(label="World 1", variable = worldVar, command=lambda:self.setWorldNum(1))
+        worldmenu.add_radiobutton(label="World 2", variable = worldVar, command=lambda:self.setWorldNum(2))
+        worldmenu.add_radiobutton(label="World 3", variable = worldVar, command=lambda:self.setWorldNum(3))
+        worldmenu.add_radiobutton(label="World 4", variable = worldVar, command=lambda:self.setWorldNum(4))
+        worldmenu.add_radiobutton(label="World 5", variable = worldVar, command=lambda:self.setWorldNum(5))
+        speedmenu.invoke(self.sP.worldToRun-1)   #default write interval is 25
         editmenu = tk.Menu(self.menubar, tearoff=0)
         editmenu.add_cascade(label="Write Interval", menu=speedmenu)
+        editmenu.add_cascade(label="World to Run", menu=worldmenu)
         editmenu.add_command(label="Parameters", command=self.showDevWin)
         self.menubar.add_cascade(label="Edit", menu=editmenu)
         trackmenu = tk.Menu(self.menubar, tearoff=0)
@@ -266,8 +275,9 @@ class GUIDriver:
 
             #plot the world: the Animat and food, for now
             for animat in self.world.animats:
-                self.worldGraph.plotImage(self.worldGraph.size_up(self.animatImage, (animat.radius*2,animat.radius*2), animat.direc-np.pi/2.), (animat.radius*2,animat.radius*2), (animat.pos[0], animat.pos[1]), animat.direc-np.pi/2.)
-                #self.worldGraph.plotCircle((animat.radius*2,animat.radius*2), (animat.pos[0], animat.pos[1]), self.colorGrey)
+                self.worldGraph.plotCircle((animat.radius*2,animat.radius*2), (animat.pos[0], animat.pos[1]), self.colorGrey)
+                headPos = animat.pos[0]+(animat.radius)*np.cos(animat.direc), animat.pos[1]+(animat.radius)*np.sin(animat.direc)
+                self.worldGraph.plotCircle((.2,.2), headPos, self.colorBlack)
                 self.worldGraph.plotText(("Purisa", 6) , (animat.pos[0], animat.pos[1]), animat.id)
                 if not (animat.id in self.neuron_graphs.iterkeys()):
                     neuronGraph = Graph(self.root, self.neuron_box.content_bounds, [-1.1, 1.1, -1.1, 1.1])
@@ -283,9 +293,9 @@ class GUIDriver:
 
 
             for food in self.world.foods:
-                foodImage = self.worldGraph.size_up(Image.open(food.image), (1,1), 0)
+                #foodImage = self.worldGraph.size_up(Image.open(food.image), (1,1), 0)
                 if food.amt > 0.0:
-                    self.worldGraph.plotImage(foodImage, (1, 1), food.pos)
+                    self.worldGraph.plotCircle((1,1), food.pos, self.colorGreen)
                 #self.worldGraph.plotCircle((1,1), food.pos, self.colorGreen)
             self.worldGraph.draw(self.canvas)
 
@@ -577,6 +587,8 @@ class GUIDriver:
         for row in S:
             print row
 
+    def setWorldNum(self,num):
+        self.sP.worldToRun = num
 
     def showDevWin(self):
         self.simEngine.stopSimulation()

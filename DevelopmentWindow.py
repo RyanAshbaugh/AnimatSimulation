@@ -25,14 +25,20 @@ class DevelopmentWindow():
         fLocs2 = [(1,1),(2,2),(3,3),(4,4),(3,5),(2,6),(1,7),(0,8),(-2,6),(-4,4),(-6,2),(-8,0),(-5,0),(-2,-3),(-5,-5)]
         fLocs3 = [(-2,2),(-1,0),(1,0),(-1,0),(2,-2),(3,5),(-5,5),(-8,8),(10,10),(-10,10),(10,-10),(0,-1),(0,-2),(0,-3),(0,-4)]
         fLocs4 = [(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(20)]
+        fLocs5 = [(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(20)]
         self.worlds.append([1,15,20,fLocs1])
         self.worlds.append([1,15,20,fLocs2])
         self.worlds.append([1,15,20,fLocs3])
         self.worlds.append([1,20,20,fLocs4])
+        self.worlds.append([1,20,20,fLocs5])
 
         #parameters
         self.sP = SimParam.SimParam()
-        self.sP.setWorld(1,self.worlds[1][0],self.worlds[1][1],self.worlds[1][2],self.worlds[1][3])   #change first index to change default world
+        self.sP.setWorld(1,self.worlds[0][0],self.worlds[0][1],self.worlds[0][2],self.worlds[0][3])   #change first index to change default world
+        self.sP.setWorld(2,self.worlds[1][0],self.worlds[1][1],self.worlds[1][2],self.worlds[1][3])
+        self.sP.setWorld(3,self.worlds[2][0],self.worlds[2][1],self.worlds[2][2],self.worlds[2][3])
+        self.sP.setWorld(4,self.worlds[3][0],self.worlds[3][1],self.worlds[3][2],self.worlds[3][3])
+        self.sP.setWorld(5,self.worlds[4][0],self.worlds[4][1],self.worlds[4][2],self.worlds[4][3])
         self.sP.setAnimParams(1,1,"Wheel Animat",(1,0),1,[80,.02,.25,-65,2],[320,.02,.2,-65,8])
         self.paused = True                     #paused?
         self.lastTime = 0
