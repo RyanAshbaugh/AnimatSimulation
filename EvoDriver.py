@@ -18,6 +18,7 @@ import operator
 import math
 import cPickle
 
+
 class EvoDriver():
 
     def __init__(self, usr="lucasrh", pw="Grammercy1101grove"):
@@ -42,7 +43,7 @@ class EvoDriver():
         #self.worlds.append([1,20,20,fLocs5])
 
         #EvoDriver Variables
-        self.cycleNum = 10       #how many cycles on main loop
+        self.cycleNum = 2       #how many cycles on main loop
         self.reRankNum = 100      #how many new animats to run before reRanking
         self.nodeNum = 8         #how many nodes on cluster
         self.maxAnimats = 1000    #how large list of parameters should be

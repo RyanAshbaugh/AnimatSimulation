@@ -29,22 +29,16 @@ class World:
             id = "Animat " + str(x)
             self.animats.append(AnimatShell.WheelAnimat(self.sP.getAnimParams(x)))
         self.smells = []
-        self.foods = []
-        foodArray = self.setup_food()
-        self.smells.append(["Type 1", foodArray])
+        self.foods = self.setup_food()
 
     def setup_food(self):
+        foods = []
         food_loc = self.sP.getFoodLocs(self.sP.worldToRun)
-        food_str = []
-
-        for loc in food_loc:
-            food = Stimuli.Food(loc = loc)
-            self.foods.append(food)
-            food_str.append(food.amt)
-
-        food_loc = np.vstack(food_loc)
-        food_str = np.hstack(food_str)
-        return [food_loc, food_str]
+        for i,loc in enumerate(food_loc):
+            #if i > len(food_loc)*.75: foods.append(Stimuli.GoodFood(loc))
+            #else: foods.append(Stimuli.BadFood(loc))
+            foods.append(Stimuli.BadFood(loc))
+        return foods
 
     def determineTraction(self,pos):
         pass
@@ -71,16 +65,13 @@ class World:
             self.animats[i].loadDynamicState(animat_state[i])
 
     def update(self, t, dt):
-        for foodArray in self.smells:
-            for animat in self.animats:
-                animat.smell(foodArray)
-                animat.runNetwork(t, dt)
-                traction = self.determineTraction(animat.pos)
-                animat.move(traction, t)
-                foodArray[1][1] = animat.eat(foodArray) #returns array with updated food amounts
-                self.updateFood(foodArray[1][1])        #updates food objects
-
-
+        for animat in self.animats:
+            animat.smell(self.foods)
+            animat.runNetwork(t, dt)
+            traction = self.determineTraction(animat.pos)
+            animat.move(traction, t)
+            self.foods = animat.eat(self.foods) #returns array with updated food amounts
+            #self.updateFood(foodArray[1][1])        #updates food objects
 
     #get rid of foods that are eaten
     def updateFood(self,amts):

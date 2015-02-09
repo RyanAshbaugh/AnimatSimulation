@@ -291,8 +291,9 @@ class GUIDriver:
                     neuronGraph.plotCircle((.05, .05), (neuron.X, neuron.Y), neuron.firing_color if neuron.isFiring() else neuron.color)
                 neuronGraph.draw(self.canvas)
 
-            #foodImage = self.worldGraph.size_up(self.foodImage, (1,1), 0)
+
             for food in self.world.foods:
+                #foodImage = self.worldGraph.size_up(Image.open(food.image), (1,1), 0)
                 if food.amt > 0.0:
                     self.worldGraph.plotCircle((1,1), food.pos, self.colorGreen)
                 #self.worldGraph.plotCircle((1,1), food.pos, self.colorGreen)
@@ -577,6 +578,7 @@ class GUIDriver:
         canvas.show()
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         NavigationToolbar2TkAgg(canvas,win)
+
 
     #Used for debug, prints value of S to terminal
     def printS(self):

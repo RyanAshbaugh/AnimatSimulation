@@ -5,6 +5,7 @@ Simulates brain, contains all neurons
 
 all data flow operations work correctly, just needs lots of functionality added
 
+
 '''
 
 from NeuronModule import InhibitoryNeuron
@@ -33,6 +34,8 @@ class Network:
          self.inhibParams = inhib
          self.excitParams = excit
          self.imported = False
+
+         self.kSynapseDecay = 0.7
 
 
          #Izhikevich Variables
@@ -344,14 +347,15 @@ class Network:
          self.v[self.fired] = self.c[self.fired]
          self.u[self.fired]= self.u[self.fired] + self.d[self.fired]
 
-         self.I = self.I + np.sum(self.S[self.fired],axis=0)
+         newI = np.sum(self.S[self.fired],axis=0)
+         self.I = self.kSynapseDecay*self.I + newI
 
          self.v=self.v+0.5*(0.04*(self.v**2) + 5*self.v + 140-self.u + self.I)
          self.v=self.v+0.5*(0.04*(self.v**2) + 5*self.v + 140-self.u + self.I)
 
          self.u=self.u+self.a*(self.b*self.v - self.u)
 
-         self.I = 2*np.ones( (self.totalNum), dtype = np.float32 )  #moved from smell method to end of runNetwork
+
 
 
 

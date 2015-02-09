@@ -106,15 +106,14 @@ class WheelAnimat(Animat):
 
         # rotate body depending on the difference (hopefully small) of two motors along direction of travel
         self.direc = self.direc + math.atan(trac*(self.motors[1]-self.motors[0])/self.radius)
-        self.unwind() #the angle direc could exceed 2*pi and 'wind up'
+        #self.unwind() #the angle direc could exceed 2*pi and 'wind up'
         self.determineMotion(trac)
         self.Energy = self.Energy - self.cMotionEnergy * self.motors.sum(axis=0) - self.kBasalEnergy
 
-    def smell(self, smells):
-        smell_type = smells[0]
+    def smell(self, foods):
 
-        smell_loc = smells[1][0]        #smell locations
-        smell_str = smells[1][1] / 10       #smell strengths, divide by 10 because smell based on amount should fix
+        smell_loc = [food.getPos() for food in foods]        #smell locations
+        smell_str = [food.getSmell() for food in foods]        #smell strengths, divide by 10 because smell based on amount should fix
 
         dir = -(self.direc - math.pi/2)   #figure out the clockwise direction of the animat
         if(dir <= 0): dir += math.pi*2    #bound direction to [0, 2*pi]
@@ -123,7 +122,7 @@ class WheelAnimat(Animat):
         worldPos = np.dot(self.net.senseNeuronLocations, rotMat) + self.pos           #get the world position of the sense neurons based on the position and rotation of the Animat
 
         #built-in!
-        total_smell = self.net.sensitivity* np.sum(  self.gaussian(scipy.spatial.distance.cdist(worldPos, smell_loc ), 0, 3) *smell_str, axis=1)  #figures out the total smell strength based on the distances (gaussian distribution)
+        total_smell = self.net.sensitivity* np.sum(self.gaussian(scipy.spatial.distance.cdist(worldPos, smell_loc ), 0, 3), axis=1)  #figures out the total smell strength based on the distances (gaussian distribution)
 
         self.net.I[self.net.senseNeurons] = np.minimum(total_smell,100)   #sense neuron drive based on smell
 
@@ -146,28 +145,32 @@ class WheelAnimat(Animat):
         
     # 'Eat' if at food    
     def eat(self, foods):
-        type = foods[0]
-        food_loc = foods[1][0]
-        food_amt = foods[1][1]
+        #food_loc = [food.getPos() for food in foods]
+        #food_amt = [food.getAmount() for food in foods]
+        #print food_amt
 
-        food_dist = scipy.spatial.distance.cdist(np.array([self.pos]), food_loc)
-        whichFoods = np.logical_and(food_dist[0] < .5, food_amt > 0).nonzero()[0]  #this [0] is b/c nonzero returns list
+        #food_dist = scipy.spatial.distance.cdist(np.array([self.pos]), food_loc)
+        #possibleFoods = np.logical_and(food_dist[0] < .5, food_amt > 0).nonzero()[0]  #this [0] is b/c nonzero returns list
+        possibleFoods = []
+        for i,food in enumerate(foods):
+            x1,y1 = self.pos
+            x2,y2 = food.getPos()
+            dist = np.sqrt(np.square(np.abs(x2-x1))+np.square(np.abs(y2-y1)))
+            if((dist < 0.5) and (food.getAmount() > 0)):
+                possibleFoods.append(i)
 
         #print(whichFoods.size)
-        if whichFoods.size > 0:
+        if len(possibleFoods) > 0:
+            toEat = possibleFoods[0] #pick first food in list, change maybe to whichever is closer?
             self.Eating = 1
-            try:
-                 self.Energy += self.Calories * food_amt[whichFoods]
-                 food_amt[whichFoods] -= 1.0
-            except ValueError:
-                self.Energy += self.Calories * food_amt[whichFoods][0]  #if two foods selected choose first
-                food_amt[whichFoods][0] -= 1.0
+            self.Energy += foods[toEat].getCalories()
+            foods[toEat].decrAmt()
         else:
             self.Eating = 0 #move if not near food
         #check if hungry
         if self.Energy <= self.hungerThreshold:
             self.net.I[self.net.hungerNeurons] = 105  #-65->30 = 95 + 10 = 105
-        return food_amt
+        return foods
 
     def getStats(self):
         #stat list = Type,Energy,
