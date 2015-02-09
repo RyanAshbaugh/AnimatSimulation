@@ -11,7 +11,8 @@ all data flow operations work correctly, just needs lots of functionality added
 from NeuronModule import InhibitoryNeuron
 from NeuronModule import ExcitatoryNeuron
 from NeuronModule import MotorNeuron
-from NeuronModule import SensoryNeuron
+from NeuronModule import SensoryNeuron_A
+from NeuronModule import SensoryNeuron_B
 from NeuronModule import HungerNeuron
 import math
 import numpy as np
@@ -28,7 +29,8 @@ class Network:
          self.numExcitatory = 0
          self.numInhibitory = 0
          self.numMotor = 0
-         self.numSensory = 0
+         self.numSensory_A = 0
+         self.numSensory_B = 0
          self.numHunger = 0
          self.totalNum = 0
          self.inhibParams = inhib
@@ -67,9 +69,13 @@ class Network:
          self.hungerNeurons = np.array([],dtype=np.int_)
 
          #These will be dictionaries of Lists eventually for different types of sensory neurons!
-         self.senseNeurons = np.array([], dtype=np.int_)
-         self.senseNeuronLocations = np.array([],ndmin=2)
-         self.sensitivity = np.array([], ndmin = 2)
+         self.senseNeurons_A = np.array([], dtype=np.int_)
+         self.senseNeuronLocations_A = np.array([],ndmin=2)
+         self.sensitivity_A = np.array([], ndmin = 2)
+         self.senseNeurons_B = np.array([], dtype=np.int_)
+         self.senseNeuronLocations_B = np.array([],ndmin=2)
+         self.sensitivity_B = np.array([], ndmin = 2)
+
 
          #Network connection variables
          self.Lnum = 3      #ligand number
@@ -104,7 +110,8 @@ class Network:
 
              self.excitatoryNeurons += 1
              self.motorNeurons += 1
-             self.senseNeurons += 1
+             self.senseNeurons_A += 1
+             self.senseNeurons_B += 1
              self.hungerNeurons += 1
 
          if type == 'excitatory':
@@ -119,7 +126,8 @@ class Network:
              self.numExcitatory += 1
 
              self.motorNeurons += 1
-             self.senseNeurons += 1
+             self.senseNeurons_A += 1
+             self.senseNeurons_B += 1
              self.hungerNeurons += 1
 
          if type == 'motor':
@@ -133,28 +141,45 @@ class Network:
              self.v = np.insert(self.v, loc, -65)
              self.numMotor += 1
 
-             self.senseNeurons += 1
+             self.senseNeurons_A += 1
+             self.senseNeurons_B += 1
              self.hungerNeurons += 1
 
-         if type == 'sensory':
-             loc = self.numExcitatory + self.numInhibitory + self.numMotor + self.numSensory
-             self._neurons.insert(loc, SensoryNeuron(pos[0], pos[1], 0))
-             self._neurons[loc]
-             self.senseNeurons = np.append(self.senseNeurons, loc)
-             if self.numSensory == 0: self.senseNeuronLocations = np.array([pos[0],pos[1]],ndmin=2)
-             else: self.senseNeuronLocations = np.insert(self.senseNeuronLocations, self.numSensory, np.array((pos[0], pos[1])), axis = 0)
+         if type == 'sensory_A':
+             loc = self.numExcitatory + self.numInhibitory + self.numMotor + self.numSensory_A
+             self._neurons.insert(loc, SensoryNeuron_A(pos[0], pos[1], 0))
+             self.senseNeurons_A = np.append(self.senseNeurons_A, loc)
+             if self.numSensory_A == 0: self.senseNeuronLocations_A = np.array([pos[0],pos[1]],ndmin=2)
+             else: self.senseNeuronLocations_A = np.insert(self.senseNeuronLocations_A, self.numSensory_A, np.array((pos[0], pos[1])), axis = 0)
              self.a = np.insert(self.a, loc, 0.02)
              self.b = np.insert(self.b, loc, 0.2)
              self.c = np.insert(self.c, loc, -65)
              self.d = np.insert(self.d, loc, 8)
              self.v = np.insert(self.v, loc, -65)
-             self.sensitivity = np.append(self.sensitivity, sensitivity)
-             self.numSensory += 1
+             self.sensitivity_A = np.append(self.sensitivity_A, sensitivity)
+             self.numSensory_A += 1
+
+             self.senseNeurons_B += 1
+             self.hungerNeurons += 1
+
+         if type == 'sensory_B':
+             loc = self.numExcitatory + self.numInhibitory + self.numMotor + self.numSensory_A + self.numSensory_B
+             self._neurons.insert(loc, SensoryNeuron_B(pos[0], pos[1], 0))
+             self.senseNeurons_B = np.append(self.senseNeurons_B, loc)
+             if self.numSensory_B == 0: self.senseNeuronLocations_B = np.array([pos[0],pos[1]],ndmin=2)
+             else: self.senseNeuronLocations_B = np.insert(self.senseNeuronLocations_B, self.numSensory_B, np.array((pos[0], pos[1])), axis = 0)
+             self.a = np.insert(self.a, loc, 0.02)
+             self.b = np.insert(self.b, loc, 0.2)
+             self.c = np.insert(self.c, loc, -65)
+             self.d = np.insert(self.d, loc, 8)
+             self.v = np.insert(self.v, loc, -65)
+             self.sensitivity_B = np.append(self.sensitivity_B, sensitivity)
+             self.numSensory_B += 1
 
              self.hungerNeurons += 1
 
          if type == 'hunger':
-             loc = self.numExcitatory + self.numInhibitory + self.numMotor + self.numSensory + self.numHunger
+             loc = self.numExcitatory + self.numInhibitory + self.numMotor + self.numSensory_A + self.numSensory_B + self.numHunger
              self._neurons.insert(loc, HungerNeuron(pos[0], pos[1], 0))
              self.hungerNeurons = np.append(self.hungerNeurons, loc)
              self.a = np.insert(self.a, loc, 0.02)
@@ -212,7 +237,8 @@ class Network:
                  #    self.add_neuron("excitatory",(xPos,yPos))         #otherwise make excitatory
          for i in xrange(0,10):
              temp = np.pi*((1.0/22.0)+((float(i)+.5)/11.0))
-             self.add_neuron("sensory",(np.cos(temp),np.sin(temp)))
+             self.add_neuron("sensory_A",(np.cos(temp)-.01,np.sin(temp)-.01))
+             self.add_neuron("sensory_B",(np.cos(temp)+.01,np.sin(temp)+.01))
 
 
 
@@ -239,12 +265,16 @@ class Network:
          #for every neuron in the "grid"
          for index1 in (np.hstack((self.excitatoryNeurons,self.inhibitoryNeurons,self.hungerNeurons))):
             #if edge neuron, connect to appropriate motor
-            if (self._neurons[index1].X==-0.45): self.connectNeurons(index1,self.motorNeurons[0],30)
-            if (self._neurons[index1].X==0.45): self.connectNeurons(index1,self.motorNeurons[1],30)
-            #if top neuron, connect each sense neuron to it
+            if (self._neurons[index1].X==-0.45): self.connectNeurons(index1,self.motorNeurons[0],10)
+            if (self._neurons[index1].X==0.45): self.connectNeurons(index1,self.motorNeurons[1],10)
+            #if top neuron, connect each sense_A neuron to it
             if (self._neurons[index1].Y==0.45):
-                for sense in self.senseNeurons:
-                    self.connectNeurons(sense,index1,30)
+                for sense in self.senseNeurons_A:
+                    self.connectNeurons(sense,index1,10)
+            #if bottom neuron, connect each sense_B neuron to it
+            if (self._neurons[index1].Y== -0.45):
+                for sense in self.senseNeurons_B:
+                    self.connectNeurons(sense,index1,10)
             for index2 in (np.hstack((self.excitatoryNeurons,self.inhibitoryNeurons))):
                 #str_ = 5
                 if (index1 != index2):

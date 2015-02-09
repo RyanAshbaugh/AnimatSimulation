@@ -35,9 +35,9 @@ class World:
         foods = []
         food_loc = self.sP.getFoodLocs(self.sP.worldToRun)
         for i,loc in enumerate(food_loc):
-            #if i > len(food_loc)*.75: foods.append(Stimuli.GoodFood(loc))
-            #else: foods.append(Stimuli.BadFood(loc))
-            foods.append(Stimuli.BadFood(loc))
+            if i > len(food_loc)*.75: foods.append(Stimuli.Food_B(loc))
+            else: foods.append(Stimuli.Food_A(loc))
+            #foods.append(Stimuli.Food_A(loc))
         return foods
 
     def determineTraction(self,pos):

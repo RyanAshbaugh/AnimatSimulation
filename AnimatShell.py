@@ -106,25 +106,36 @@ class WheelAnimat(Animat):
 
         # rotate body depending on the difference (hopefully small) of two motors along direction of travel
         self.direc = self.direc + math.atan(trac*(self.motors[1]-self.motors[0])/self.radius)
-        #self.unwind() #the angle direc could exceed 2*pi and 'wind up'
+        self.unwind() #the angle direc could exceed 2*pi and 'wind up'
         self.determineMotion(trac)
         self.Energy = self.Energy - self.cMotionEnergy * self.motors.sum(axis=0) - self.kBasalEnergy
 
     def smell(self, foods):
-
-        smell_loc = [food.getPos() for food in foods]        #smell locations
-        smell_str = [food.getSmell() for food in foods]        #smell strengths, divide by 10 because smell based on amount should fix
+        smell_loc_A = []
+        smell_str_A = []
+        smell_loc_B = []
+        smell_str_B = []
+        for food in foods:
+            if food.getType() == "A":
+                smell_loc_A.append(food.getPos())
+                smell_str_A.append(food.getSmell())
+            if food.getType() == "B":
+                smell_loc_B.append(food.getPos())
+                smell_str_B.append(food.getSmell())
 
         dir = -(self.direc - math.pi/2)   #figure out the clockwise direction of the animat
         if(dir <= 0): dir += math.pi*2    #bound direction to [0, 2*pi]
-
         rotMat = np.array([[np.cos(dir), -np.sin(dir)], [np.sin(dir), np.cos(dir)]])  #construct the rotation matrix
-        worldPos = np.dot(self.net.senseNeuronLocations, rotMat) + self.pos           #get the world position of the sense neurons based on the position and rotation of the Animat
+
+        worldPos_A = np.dot(self.net.senseNeuronLocations_A, rotMat) + self.pos           #get the world position of the sense neurons based on the position and rotation of the Animat
+        worldPos_B = np.dot(self.net.senseNeuronLocations_B, rotMat) + self.pos           #get the world position of the sense neurons based on the position and rotation of the Animat
 
         #built-in!
-        total_smell = self.net.sensitivity* np.sum(self.gaussian(scipy.spatial.distance.cdist(worldPos, smell_loc ), 0, 3), axis=1)  #figures out the total smell strength based on the distances (gaussian distribution)
+        total_smell_A = self.net.sensitivity_A * np.sum(self.gaussian(scipy.spatial.distance.cdist(worldPos_A, smell_loc_A ), 0, 3), axis=1)  #figures out the total smell strength based on the distances (gaussian distribution)
+        total_smell_B = self.net.sensitivity_B * np.sum(self.gaussian(scipy.spatial.distance.cdist(worldPos_B, smell_loc_B ), 0, 3), axis=1)  #figures out the total smell strength based on the distances (gaussian distribution)
 
-        self.net.I[self.net.senseNeurons] = np.minimum(total_smell,100)   #sense neuron drive based on smell
+        self.net.I[self.net.senseNeurons_A] = np.minimum(total_smell_A,100)   #sense neuron drive based on smell
+        self.net.I[self.net.senseNeurons_B] = np.minimum(total_smell_B,100)   #sense neuron drive based on smell
 
 
 

@@ -295,7 +295,8 @@ class GUIDriver:
             for food in self.world.foods:
                 #foodImage = self.worldGraph.size_up(Image.open(food.image), (1,1), 0)
                 if food.amt > 0.0:
-                    self.worldGraph.plotCircle((1,1), food.pos, self.colorGreen)
+                    self.worldGraph.plotCircle((1,1), food.getPos(), self.colorGreen)
+                    self.worldGraph.plotText(("Purisa", 6) , (food.getPos()[0], food.getPos()[1]), food.getType())
                 #self.worldGraph.plotCircle((1,1), food.pos, self.colorGreen)
             self.worldGraph.draw(self.canvas)
 

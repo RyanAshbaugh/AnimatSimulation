@@ -20,20 +20,24 @@ class Stimulus():
         self.pos = startPos
 
     def getPos(self):
-        return self.pos
+        return [self.pos[0],self.pos[1]]
 
 
 ##################### Food CLass ######################################################
                  ## Basic food object ##
 
-class GoodFood(Stimulus):
+class Food_A(Stimulus):
 
     def __init__(self,loc,amount=10.0):
         Stimulus.__init__(self,startPos = loc)
+        self.type = "A"
         self.amt = amount
-        self.smellStr = 5
+        self.smellStr = 1
         self.calories = 10
         self.image = "apple_bunch.png"
+
+    def getType(self):
+        return self.type
 
     def getAmount(self):
         return self.amt
@@ -47,14 +51,18 @@ class GoodFood(Stimulus):
     def decrAmt(self):
         self.amt -= 1.0
 
-class BadFood(Stimulus):
+class Food_B(Stimulus):
 
     def __init__(self,loc,amount=10.0):
         Stimulus.__init__(self,startPos = loc)
+        self.type = "B"
         self.amt = amount
         self.smellStr = 1
         self.calories = 5
         self.image = "apple.png"
+
+    def getType(self):
+        return self.type
 
     def getAmount(self):
         return self.amt
