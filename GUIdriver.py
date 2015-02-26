@@ -13,15 +13,11 @@ try:
    import cPickle as pickle
 except:
    import pickle
-import _tkinter
 import Tkinter as tk
 from PIL import Image
 from PIL import ImageTk
 from Graph import Graph
-import jsonpickle
 import cPickle
-import json
-import msgpack
 import matplotlib
 matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
@@ -33,6 +29,7 @@ from VideoBar import VideoBar
 import tkFileDialog
 import collections
 import SimParam
+import NeuronModule
 
 
 class GUIDriver:
@@ -131,6 +128,7 @@ class GUIDriver:
         self.menubar.add_cascade(label="View",menu=viewMenu)
         debugMenu = tk.Menu(self.menubar, tearoff=0)
         debugMenu.add_command(label="Print S",command = self.printS)
+        debugMenu.add_command(label="Print RL",command = self.printRL)
         self.menubar.add_cascade(label="Debug",menu=debugMenu)
         self.root.config(menu=self.menubar)
 
@@ -207,20 +205,20 @@ class GUIDriver:
         rb3.invoke() #needs to be called after speed scale is created
 
         #Create legend for neuron map
-        title = tk.Label(self.root,text="Neural Network Legend",font="bold",relief="ridge",padx=5,pady=5)
-        title.place(x=1050,y=100)
-        inhib_t = tk.Label(self.root, text="Inhibitory Neuron: ")
-        inhib_t.place(x=1050,y=150)
-        inhib_c = self.canvas.create_oval(1175,150,1200,175, fill = "#b1b1ff")
-        excit_t = tk.Label(self.root, text="Excitatory Neuron: ")
-        excit_t.place(x=1050,y=200)
-        excit_c = self.canvas.create_oval(1175,200,1200,225, fill = "#ffb1b1")
-        motor_t = tk.Label(self.root, text="Motor Neuron: ")
-        motor_t.place(x=1050,y=250)
-        motor_c = self.canvas.create_oval(1175,250,1200,275, fill = "#ffffff")
-        sense_t = tk.Label(self.root, text="Sensory Neuron: ")
-        sense_t.place(x=1050,y=300)
-        sense_c = self.canvas.create_oval(1175,300,1200,325, fill = "#b1ffb1")
+        tk.Label(self.root,text="Neural Network Legend",font="bold",relief="ridge",padx=5,pady=5).place(x=1050,y=100)
+        #inhib_t = tk.Label(self.root, text="Inhibitory Neuron: ")
+        #inhib_t.place(x=1050,y=150)
+        #inhib_c = self.canvas.create_oval(1175,150,1200,175, fill = "#b1b1ff")
+        tk.Label(self.root, text="Excitatory Neuron: ").place(x=1050,y=150)
+        self.canvas.create_oval(1200,150,1225,175, fill = NeuronModule.ExcitatoryNeuron(0,0,0).color)
+        tk.Label(self.root, text="Hunger Neuron: ").place(x=1050,y=200)
+        self.canvas.create_oval(1200,200,1225,225, fill = NeuronModule.HungerNeuron(0,0,0).color)
+        tk.Label(self.root, text="Motor Neuron: ").place(x=1050,y=250)
+        self.canvas.create_oval(1200,250,1225,275, fill = NeuronModule.MotorNeuron(0,0,0).color)
+        tk.Label(self.root, text="Sensory Neuron A: ").place(x=1050,y=300)
+        self.canvas.create_oval(1200,300,1225,325, fill = NeuronModule.SensoryNeuron_A(0,0,0).color)
+        tk.Label(self.root, text="Sensory Neuron B: ").place(x=1050,y=350)
+        self.canvas.create_oval(1200,350,1225,375, fill = NeuronModule.SensoryNeuron_B(0,0,0).color)
 
         #pack up the Frame and run
         mainContainer = tk.Frame(self.root)
@@ -558,20 +556,18 @@ class GUIDriver:
         netCircle = plt.Circle((0,0), radius = 1, fill = False )
         ax.add_artist(netCircle)
         neurons = self.world.animats[0].net.getNeurons()
-        locs = {} # used for storing neurons in index : location
+        locs = {}                        # used for storing neurons in index : location,color
         for neuron in neurons:
             ax.add_artist(plt.Circle((neuron.X,neuron.Y),radius=.025,facecolor=neuron.color,edgecolor='black'))
-            locs[neuron.index] = (neuron.X,neuron.Y)
+            locs[neuron.index] = (neuron.X,neuron.Y,neuron.firing_color)
         for i,connectsFrom in enumerate(self.world.animats[0].net.S):
-            startLoc = locs[i]
-            cs = ""
-            if startLoc[0] < 0:
-                cs = "angle3,angleA=45,angleB=0"
+            startLoc = locs[i][0],locs[i][1]+.025
+            color = locs[i][2]
             for connectsTo in np.nonzero(connectsFrom)[0]:
-                endLoc = locs[connectsTo]
+                endLoc = locs[connectsTo][0],locs[connectsTo][1]-.025
+                weight = connectsFrom[connectsTo]
                 ax.annotate("",xy=endLoc,xytext=startLoc,size=5,
-                            arrowprops=dict(arrowstyle="simple",connectionstyle="arc3,rad=0.3",alpha=0.3))
-
+                            arrowprops=dict(facecolor=color,width=weight/1000.0,headwidth=weight/1000.0))
         #ax.annotate("",xy=(-1,0),xytext=(1,0),arrowprops=dict(arrowstyle="simple",connectionstyle="arc3,rad=0.3",alpha=0.3))
 
         ##Show plot
@@ -585,8 +581,12 @@ class GUIDriver:
     def printS(self):
         S = self.world.animats[0].net.S
         print "S: \n"
-        for row in S:
-            print row
+        for row in S: print row
+
+    def printRL(self):
+        for neuron in self.world.animats[0].net.getNeurons():
+            print "R: ", neuron.r
+            print "L: ", neuron.l
 
     def setWorldNum(self,num):
         self.sP.worldToRun = num

@@ -40,13 +40,13 @@ class Neuron(object):
         #connection vars
         self.Lnum = 3
         self.Rnum = 4
-        self.ligands = []
-        self.receptors = []
+        self.l = []
+        self.r = []
 
 
     def setRL(self,r,l):
-        self.receptors = r
-        self.ligands = l
+        self.r = r
+        self.l = l
 
     def copyDynamicState(self):
         state = []
@@ -81,6 +81,7 @@ class Neuron(object):
         #    self.weights.append(float(state[8][i])/(10.**1))
 
 
+    #Used for GUI
     def isFiring(self):
         try:
             return self.membranePotential >= self.FIRED_VALUE
@@ -88,6 +89,7 @@ class Neuron(object):
             print self.membranePotential
             return False
 
+    #Only used by checkIfFired() which is not used
     def fire(self):
         self.u=self.u + self.d
         #self.membranePotential+=self.c
@@ -101,6 +103,7 @@ class Neuron(object):
             a = []
             #print "MOTOR NEURON FIRED!!! " + str(self.X) + ", " + str(self.Y)
 
+    #Only used by Synapse module which is not used
     def receivePSP(self, pspAmount):
         self.inputs+=pspAmount
 
@@ -148,6 +151,7 @@ class Neuron(object):
                 self.axons.append(index)
                 self.weights.append(self.dv_S)
 
+    #Not used
     def checkIfFired(self):
         if self.membranePotential > self.FIRED_VALUE:
             self.fire()
@@ -194,8 +198,8 @@ class ExcitatoryNeuron(Neuron):
         self.dv_E = 0.6
         self.dv_I = 2.7
         self.dv_M = .6
-        self.firing_color = "#ff0000"
-        self.color = "#ffb1b1"
+        self.firing_color = "#000000"
+        self.color = "#ff0000"   #Red
 
     def getDrive(self, dt):
         return 0.2
@@ -205,15 +209,17 @@ class MotorNeuron(Neuron):
 
     def __init__(self, X, Y, i):
         Neuron.__init__(self, 65, X,Y, i)
-        self.a = 0.02;
-        self.b = 0.2;
-        self.c = -65 + 15 * (0.5**2);
-        self.d = 8 - 6 * (0.5**2);
-        self.u = self.b*self.membranePotential;
-        self.p_E = .1;
-        self.p_I = .5;
-        self.dv_E = 0.6;
-        self.dv_I = 2.7;
+        self.a = 0.02
+        self.b = 0.2
+        self.c = -65 + 15 * (0.5**2)
+        self.d = 8 - 6 * (0.5**2)
+        self.u = self.b*self.membranePotential
+        self.p_E = .1
+        self.p_I = .5
+        self.dv_E = 0.6
+        self.dv_I = 2.7
+        self.firing_color = "#000000"
+        self.color = "#808080"  #Grey
 
     def getDrive(self,dt):
         return 0
@@ -250,7 +256,7 @@ class SensoryNeuron_A(Neuron):
         self.drive = 0
         self.DRIVE_CONSTANT = 50000
         self.firing_color = "#000000"
-        self.color = "#FFFF00"
+        self.color = "#009900"     #Green
 
     def getDrive(self,dt):
         return self.drive
@@ -277,8 +283,8 @@ class SensoryNeuron_B(Neuron):
         self.dv_M = 100
         self.drive = 0
         self.DRIVE_CONSTANT = 50000
-        self.firing_color = "#0000ff"
-        self.color = "#FFFF00"
+        self.firing_color = "#000000"
+        self.color = "#0000FF"   #Blue
 
     def getDrive(self,dt):
         return self.drive
@@ -305,4 +311,4 @@ class HungerNeuron(Neuron):
         self.drive = 0
         self.DRIVE_CONSTANT = 50000
         self.firing_color = "#000000"
-        self.color = "#33CC33"
+        self.color = "#660066"    #Purple

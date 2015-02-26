@@ -1,4 +1,4 @@
-__author__ = 'Steven'
+
 '''
 Network Module
 Simulates brain, contains all neurons
@@ -219,77 +219,102 @@ class Network:
          self.u=self.b*self.v;
 
      def generateNeurons(self):
-         self.add_neuron("motor",(-1,0))
-         self.add_neuron("motor",(1,0))
-         for i in xrange(10):                                         #generate 10x10 grid of neurons from -.5 to .5
-             for j in xrange(10):
-                 xPos = -.45+(i*(0.1))
-                 yPos = -.45+(j*(0.1))
-                 if (i == 4 or i == 5) and (j == 4 or j== 5): self.add_neuron("hunger",(xPos,yPos))
-                 else: self.add_neuron("excitatory",(xPos,yPos))
-                 ## Below code to add inhib neurons
-                 #if i == 2 or i == 7:                                  #in rows 3 and 8 of grid
-                 #    if(j in xrange(2,7)):                             #for neurons 3-7
-                 #        self.add_neuron("inhibitory",(xPos,yPos))     #make inhibitory
-                 #    else:
-                 #        self.add_neuron("excitatory",(xPos,yPos))
-                 #else:
-                 #    self.add_neuron("excitatory",(xPos,yPos))         #otherwise make excitatory
-         for i in xrange(0,10):
-             temp = np.pi*((1.0/22.0)+((float(i)+.5)/11.0))
-             self.add_neuron("sensory_A",(np.cos(temp)-.01,np.sin(temp)-.01))
-             self.add_neuron("sensory_B",(np.cos(temp)+.01,np.sin(temp)+.01))
-
-
+         #Generate neurons around the circle
+         for i in xrange(40):
+             loc = (np.cos(2*np.pi*(i+0.5)/40),np.sin(2*np.pi*(i+0.5)/40))
+             if i < 20:
+                 if i % 2 == 0:
+                     self.add_neuron("sensory_A",loc)
+                 else:
+                     self.add_neuron("sensory_B",loc)
+             else:
+                 self.add_neuron("excitatory",loc)
+         #Generate hunger and motor neurons
+         self.add_neuron("hunger",(0,0))
+         self.add_neuron("motor",(-.9,0))
+         self.add_neuron("motor",(.9,0))
 
      def connectNetwork(self):
+         #Parameters
          L = 3
-         K = 5
+         K = 6
          A = 2.0
-         B = 10000.0
-         if self.aa == -1:        #if -1 then means aa and bb not already defined
-            aa = [[np.random.laplace()*.25 for x in xrange(K)] for x in xrange(L)] #create LxK arrays
-            bb = [[np.random.laplace()*.25 for x in xrange(K)] for x in xrange(L)]
-            for i in xrange(L):
-                aa[i][0] = np.sum(np.abs(aa[i][1:]))
-                bb[i][0] = np.sum(np.abs(bb[i][1:]))
-         else:
-             aa = self.aa        #makes line length shorter
-             bb = self.bb
-         #set up ligand and receptor lists for each neuron based on a and b
-         for z,neuron in enumerate(self._neurons):
-            x,y = neuron.X,neuron.Y
-            r = [aa[i][0] + aa[i][1]*x + aa[i][2]*y + aa[i][3]*np.cos(np.pi*x) + aa[i][4]*np.cos(np.pi*y) for i in xrange(3)]
-            l = [bb[i][0] + bb[i][1]*x + bb[i][2]*y + bb[i][3]*np.cos(np.pi*x) + bb[i][4]*np.cos(np.pi*y) for i in xrange(3)]
-            neuron.setRL(r,l)
-         #for every neuron in the "grid"
-         for index1 in (np.hstack((self.excitatoryNeurons,self.inhibitoryNeurons,self.hungerNeurons))):
-            #if edge neuron, connect to appropriate motor
-            if (self._neurons[index1].X==-0.45): self.connectNeurons(index1,self.motorNeurons[0],10)
-            if (self._neurons[index1].X==0.45): self.connectNeurons(index1,self.motorNeurons[1],10)
-            #if top neuron, connect each sense_A neuron to it
-            if (self._neurons[index1].Y==0.45):
-                for sense in self.senseNeurons_A:
-                    self.connectNeurons(sense,index1,10)
-            #if bottom neuron, connect each sense_B neuron to it
-            if (self._neurons[index1].Y== -0.45):
-                for sense in self.senseNeurons_B:
-                    self.connectNeurons(sense,index1,10)
-            for index2 in (np.hstack((self.excitatoryNeurons,self.inhibitoryNeurons))):
-                #str_ = 5
-                if (index1 != index2):
-                    if (index1 in self.inhibitoryNeurons): str_ = -15
-                    n1 = self._neurons[index1]    #pull neuron objects to get r and l arrays
-                    n2 = self._neurons[index2]
-                    #exp( A* sum( r(j,i) .* l(k,i)) / (B + exp(A*sum(r(j,i) .* l(k,i))) )
-                    #print np.exp(A*np.sum(np.multiply(n1.receptors,n2.ligands)))
-                    #print B+np.exp(A*np.sum(np.multiply(n1.receptors,n2.ligands)))
-                    p = np.exp(A*np.sum(np.multiply(n1.receptors,n2.ligands)))/(B+np.exp(A*np.sum(np.multiply(n1.receptors,n2.ligands))))
-                    #print p
-                    if(random.random() < p):
-                        #print str(type(n1)) + " @(" + str(n1.X) + "," + str(n1.Y) + ") ---> " + str(type(n2)) +\
-                        #      " @(" + str(n2.X) + "," + str(n2.Y) + ")"
-                        self.connectNeurons(index1, index2, 10)
+         B = 20.0
+         C = 1.0
+         D = 1.0
+
+         #Set up connection variables
+         #Hardcoded for now, will be set by evo algorithm in future
+         sigma = [[1.0, 1.0, 0.0, 1.0, 1.0], [1.0 ,1.0, 1.5, 0.0, 0.0]]    #sigma[0] = r, sigma[1] = l
+         x0 = [[1.0, 1.0, 0.0, -0.7, 0.7], [-1.0, -1.0, 0.0, 0.0, 0.0]]
+         y0 = [[-1.0, 1.0, 0.0, -0.7, -0.7], [-1.0, -1.0, -1.0, 0.0, 0.0]]
+
+         #set up ligand and receptor lists for each neuron in circle based on aa and bb
+         for index in np.hstack((self.excitatoryNeurons,self.senseNeurons_A,self.senseNeurons_B)):
+            x, y = self._neurons[index].X, self._neurons[index].Y
+            rr,ll = [],[]
+
+            for i in xrange(5):
+                print np.square(x - x0[0][i]) - np.square(y - y0[0][i])
+                rVal = sigma[0][i] - np.sqrt( np.square(x - x0[0][i]) - np.square(y - y0[0][i]))
+                lVal = sigma[1][i] - np.sqrt( np.square(x - x0[1][i]) - np.square(y - y0[1][i]))
+                if rVal < 0.0: rVal = 0.0
+                if lVal < 0.0: lVal = 0.0
+                rr.append(rVal)
+                ll.append(lVal)
+            self._neurons[index].setRL(rr,ll)
+
+         #Set up ligand and receptor lists for each motor neuron and hunger neuron
+         for index in self.hungerNeurons:
+            sigma[0][2], x0[0][2], y0[0][2] = 1,1,1     #hardcoded for hunger neurons
+            x, y = self._neurons[index].X, self._neurons[index].Y
+            rr,ll = [],[]
+            for i in xrange(5):
+                rVal = sigma[0][i] - np.sqrt( np.square(x - x0[0][i]) - np.square(y - y0[0][i]))
+                lVal = sigma[1][i] - np.sqrt( np.square(x - x0[1][i]) - np.square(y - y0[1][i]))
+                if rVal < 0: rVal = 0
+                if lVal < 0: lVal = 0
+                rr.append(rVal)
+                ll.append(lVal)
+            self._neurons[index].setRL(rr,ll)
+         sigma[0][2], x0[0][2], y0[0][2] = 0,0,0        #reset
+
+         index = self.motorNeurons[0]            #left motor neuron
+         sigma[1][3], x0[1][3], y0[1][3] = 1,1,1     #hardcoded for left motor neuron
+         x, y = self._neurons[index].X, self._neurons[index].Y
+         rr,ll = [],[]
+         for i in xrange(5):
+            rVal = sigma[0][i] - np.sqrt( np.square(x - x0[0][i]) - np.square(y - y0[0][i]))
+            lVal = sigma[1][i] - np.sqrt( np.square(x - x0[1][i]) - np.square(y - y0[1][i]))
+            if rVal < 0: rVal = 0
+            if lVal < 0: lVal = 0
+            rr.append(rVal)
+            ll.append(lVal)
+         self._neurons[index].setRL(rr,ll)
+         sigma[1][3], x0[1][3], y0[1][3] = 0,0,0         #reset
+
+         index = self.motorNeurons[1]             #right motor neuron
+         sigma[1][4], x0[1][4], y0[1][4] = 1,1,1      #hardcoded for motor neurons
+         x, y = self._neurons[index].X, self._neurons[index].Y
+         rr,ll = [],[]
+         for i in xrange(5):
+            rVal = sigma[0][i] - np.sqrt( (np.square(x - x0[0][i]) - np.square(y - y0[0][i])) )
+            lVal = sigma[1][i] - np.sqrt( (np.square(x - x0[1][i]) - np.square(y - y0[1][i])) )
+            if rVal < 0: rVal = 0
+            if lVal < 0: lVal = 0
+            rr.append(rVal)
+            ll.append(lVal)
+         self._neurons[index].setRL(rr,ll)
+
+         #Set up connection weights
+         neuronIndices = np.hstack((self.excitatoryNeurons,self.senseNeurons_A,self.senseNeurons_B,self.hungerNeurons,self.motorNeurons))
+         for n1 in neuronIndices:
+             for n2 in neuronIndices:
+                 W = np.sum( np.multiply(self._neurons[n1].r, self._neurons[n2].l) )
+                 connectionWeight = np.exp(A* W) / (B + np.exp(A*W))
+                 self.connectNeurons(n1,n2,connectionWeight)
+
+         #Create I
          self.I = 2*np.ones( (self.totalNum), dtype = np.float32 )
 
 

@@ -21,7 +21,7 @@ import cPickle
 
 class EvoDriver():
 
-    def __init__(self, usr="lucasrh", pw="Grammercy1101grove"):
+    def __init__(self, usr="usrname", pw="pw"):
 
         #Simulation Variables
         self.IDcntr = 1          #keeps track so each animat gets unique id number
