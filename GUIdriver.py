@@ -278,7 +278,7 @@ class GUIDriver:
                 self.worldGraph.plotCircle((.2,.2), headPos, self.colorBlack)
                 self.worldGraph.plotText(("Purisa", 6) , (animat.pos[0], animat.pos[1]), animat.id)
                 if not (animat.id in self.neuron_graphs.iterkeys()):
-                    neuronGraph = Graph(self.root, self.neuron_box.content_bounds, [-1.1, 1.1, -1.1, 1.1])
+                    neuronGraph = Graph(self.root, self.neuron_box.content_bounds, [-1.3, 1.3, -1.3, 1.3])
                     self.neuron_graphs[animat.id] = neuronGraph
                     self.neuron_box.add(neuronGraph, animat.id)
 
@@ -552,14 +552,14 @@ class GUIDriver:
         win = tk.Toplevel(height=800,width=1100)
         win.title("Network Connection Viewer")
         fig = Figure(figsize=(10,10))
-        ax = fig.add_subplot(111,xlim=(-1.1,1.1),ylim=(-1.1,1.1))
+        ax = fig.add_subplot(111,xlim=(-1.5, 1.5),ylim=(-1.5, 1.5))
         netCircle = plt.Circle((0,0), radius = 1, fill = False )
         ax.add_artist(netCircle)
         neurons = self.world.animats[0].net.getNeurons()
         locs = {}                        # used for storing neurons in index : location,color
         for neuron in neurons:
             ax.add_artist(plt.Circle((neuron.X,neuron.Y),radius=.025,facecolor=neuron.color,edgecolor='black'))
-            locs[neuron.index] = (neuron.X,neuron.Y,neuron.firing_color)
+            locs[neuron.index] = (neuron.X,neuron.Y,neuron.color)
         for i,connectsFrom in enumerate(self.world.animats[0].net.S):
             startLoc = locs[i][0],locs[i][1]+.025
             color = locs[i][2]
@@ -567,8 +567,18 @@ class GUIDriver:
                 endLoc = locs[connectsTo][0],locs[connectsTo][1]-.025
                 weight = connectsFrom[connectsTo]
                 ax.annotate("",xy=endLoc,xytext=startLoc,size=5,
-                            arrowprops=dict(facecolor=color,width=weight/1000.0,headwidth=weight/1000.0))
+                            arrowprops=dict(arrowstyle="->", color=color))
         #ax.annotate("",xy=(-1,0),xytext=(1,0),arrowprops=dict(arrowstyle="simple",connectionstyle="arc3,rad=0.3",alpha=0.3))
+        ax.add_artist(plt.Circle((1,1.35),radius=.025,facecolor=NeuronModule.ExcitatoryNeuron(0,0,0).color,edgecolor='black'))
+        ax.add_artist(plt.Text(1.04,1.33,"Excitatory",size='small'))
+        ax.add_artist(plt.Circle((1,1.25),radius=.025,facecolor=NeuronModule.SensoryNeuron_A(0,0,0).color,edgecolor='black'))
+        ax.add_artist(plt.Text(1.04,1.23,"Sensory A",size='small'))
+        ax.add_artist(plt.Circle((1,1.15),radius=.025,facecolor=NeuronModule.SensoryNeuron_B(0,0,0).color,edgecolor='black'))
+        ax.add_artist(plt.Text(1.04,1.13,"Sensory B",size='small'))
+        ax.add_artist(plt.Circle((1,1.05),radius=.025,facecolor=NeuronModule.MotorNeuron(0,0,0).color,edgecolor='black'))
+        ax.add_artist(plt.Text(1.04,1.03,"Motor",size='small'))
+        ax.add_artist(plt.Circle((1,0.95),radius=.025,facecolor=NeuronModule.HungerNeuron(0,0,0).color,edgecolor='black'))
+        ax.add_artist(plt.Text(1.04,0.93,"Hunger",size='small'))
 
         ##Show plot
         canvas = FigureCanvasTkAgg(fig,master=win)
@@ -581,12 +591,40 @@ class GUIDriver:
     def printS(self):
         S = self.world.animats[0].net.S
         print "S: \n"
-        for row in S: print row
+        print "Excitatory Neurons"
+        for i in self.world.animats[0].net.excitatoryNeurons:
+            print S[i]
+        print "Sensory A Neurons"
+        for i in self.world.animats[0].net.senseNeurons_A:
+            print S[i]
+        print "Sensory B Neurons"
+        for i in self.world.animats[0].net.senseNeurons_B:
+            print S[i]
+        print "Motor Neurons"
+        for i in self.world.animats[0].net.motorNeurons:
+            print S[i]
+        print "Hunger Neurons"
+        for i in self.world.animats[0].net.hungerNeurons:
+            print S[i]
 
     def printRL(self):
-        for neuron in self.world.animats[0].net.getNeurons():
-            print "R: ", neuron.r
-            print "L: ", neuron.l
+        neurons = self.world.animats[0].net.getNeurons()
+        print "Excitatory Neurons"
+        for i in self.world.animats[0].net.excitatoryNeurons:
+            print "R", neurons[i].r, "L", neurons[i].l
+        print "Sensory A Neurons"
+        for i in self.world.animats[0].net.senseNeurons_A:
+            print "R", neurons[i].r, "L", neurons[i].l
+        print "Sensory B Neurons"
+        for i in self.world.animats[0].net.senseNeurons_B:
+            print "R", neurons[i].r, "L", neurons[i].l
+        print "Motor Neurons"
+        for i in self.world.animats[0].net.motorNeurons:
+            print "R", neurons[i].r, "L", neurons[i].l
+        print "Hunger Neurons"
+        for i in self.world.animats[0].net.hungerNeurons:
+            print "R", neurons[i].r, "L", neurons[i].l
+
 
     def setWorldNum(self,num):
         self.sP.worldToRun = num

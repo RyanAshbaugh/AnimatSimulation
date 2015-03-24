@@ -231,8 +231,8 @@ class Network:
                  self.add_neuron("excitatory",loc)
          #Generate hunger and motor neurons
          self.add_neuron("hunger",(0,0))
-         self.add_neuron("motor",(-.9,0))
-         self.add_neuron("motor",(.9,0))
+         self.add_neuron("motor",(-1.2,0))
+         self.add_neuron("motor",(1.2,0))
 
      def connectNetwork(self):
          #Parameters
@@ -245,19 +245,17 @@ class Network:
 
          #Set up connection variables
          #Hardcoded for now, will be set by evo algorithm in future
-         sigma = [[1.0, 1.0, 0.0, 1.0, 1.0], [1.0 ,1.0, 1.5, 0.0, 0.0]]    #sigma[0] = r, sigma[1] = l
-         x0 = [[1.0, 1.0, 0.0, -0.7, 0.7], [-1.0, -1.0, 0.0, 0.0, 0.0]]
-         y0 = [[-1.0, 1.0, 0.0, -0.7, -0.7], [-1.0, -1.0, -1.0, 0.0, 0.0]]
+         sigma = [[1.0, 1.0, 0.0, 1.0, 1.0], [1.0, 1.0, 1.5, 0.0, 0.0]]    #sigma[0] = r, sigma[1] = l
+         x0 = [[-1.0, 1.0, 0.0, 0.7, -0.7], [-1.0, 1.0, 0.0, 0.0, 0.0]]    #x0[0] = r, x0[1] = l
+         y0 = [[1.0, 1.0, 0.0, -0.7, -0.7], [-1.0, -1.0, -1.0, 0.0, 0.0]] #y0[0] = r, y0[1] = l
 
          #set up ligand and receptor lists for each neuron in circle based on aa and bb
          for index in np.hstack((self.excitatoryNeurons,self.senseNeurons_A,self.senseNeurons_B)):
             x, y = self._neurons[index].X, self._neurons[index].Y
             rr,ll = [],[]
-
             for i in xrange(5):
-                print np.square(x - x0[0][i]) - np.square(y - y0[0][i])
-                rVal = sigma[0][i] - np.sqrt( np.square(x - x0[0][i]) - np.square(y - y0[0][i]))
-                lVal = sigma[1][i] - np.sqrt( np.square(x - x0[1][i]) - np.square(y - y0[1][i]))
+                rVal = sigma[0][i] - np.sqrt( np.square(x - x0[0][i]) + np.square(y - y0[0][i]))
+                lVal = sigma[1][i] - np.sqrt( np.square(x - x0[1][i]) + np.square(y - y0[1][i]))
                 if rVal < 0.0: rVal = 0.0
                 if lVal < 0.0: lVal = 0.0
                 rr.append(rVal)
@@ -266,52 +264,51 @@ class Network:
 
          #Set up ligand and receptor lists for each motor neuron and hunger neuron
          for index in self.hungerNeurons:
-            sigma[0][2], x0[0][2], y0[0][2] = 1,1,1     #hardcoded for hunger neurons
             x, y = self._neurons[index].X, self._neurons[index].Y
             rr,ll = [],[]
             for i in xrange(5):
-                rVal = sigma[0][i] - np.sqrt( np.square(x - x0[0][i]) - np.square(y - y0[0][i]))
-                lVal = sigma[1][i] - np.sqrt( np.square(x - x0[1][i]) - np.square(y - y0[1][i]))
+                rVal = sigma[0][i] - np.sqrt( np.square(x - x0[0][i]) + np.square(y - y0[0][i]))
+                lVal = sigma[1][i] - np.sqrt( np.square(x - x0[1][i]) + np.square(y - y0[1][i]))
                 if rVal < 0: rVal = 0
                 if lVal < 0: lVal = 0
                 rr.append(rVal)
                 ll.append(lVal)
+            rr[2] = 1
             self._neurons[index].setRL(rr,ll)
-         sigma[0][2], x0[0][2], y0[0][2] = 0,0,0        #reset
 
          index = self.motorNeurons[0]            #left motor neuron
-         sigma[1][3], x0[1][3], y0[1][3] = 1,1,1     #hardcoded for left motor neuron
          x, y = self._neurons[index].X, self._neurons[index].Y
          rr,ll = [],[]
          for i in xrange(5):
-            rVal = sigma[0][i] - np.sqrt( np.square(x - x0[0][i]) - np.square(y - y0[0][i]))
-            lVal = sigma[1][i] - np.sqrt( np.square(x - x0[1][i]) - np.square(y - y0[1][i]))
+            rVal = sigma[0][i] - np.sqrt( np.square(x - x0[0][i]) + np.square(y - y0[0][i]))
+            lVal = sigma[1][i] - np.sqrt( np.square(x - x0[1][i]) + np.square(y - y0[1][i]))
             if rVal < 0: rVal = 0
             if lVal < 0: lVal = 0
             rr.append(rVal)
             ll.append(lVal)
+         ll[3] = 1
          self._neurons[index].setRL(rr,ll)
-         sigma[1][3], x0[1][3], y0[1][3] = 0,0,0         #reset
 
          index = self.motorNeurons[1]             #right motor neuron
-         sigma[1][4], x0[1][4], y0[1][4] = 1,1,1      #hardcoded for motor neurons
          x, y = self._neurons[index].X, self._neurons[index].Y
          rr,ll = [],[]
          for i in xrange(5):
-            rVal = sigma[0][i] - np.sqrt( (np.square(x - x0[0][i]) - np.square(y - y0[0][i])) )
-            lVal = sigma[1][i] - np.sqrt( (np.square(x - x0[1][i]) - np.square(y - y0[1][i])) )
+            rVal = sigma[0][i] - np.sqrt( np.square(x - x0[0][i]) + np.square(y - y0[0][i]))
+            lVal = sigma[1][i] - np.sqrt( np.square(x - x0[1][i]) + np.square(y - y0[1][i]))
             if rVal < 0: rVal = 0
             if lVal < 0: lVal = 0
             rr.append(rVal)
             ll.append(lVal)
+         ll[3] = 1
          self._neurons[index].setRL(rr,ll)
 
          #Set up connection weights
          neuronIndices = np.hstack((self.excitatoryNeurons,self.senseNeurons_A,self.senseNeurons_B,self.hungerNeurons,self.motorNeurons))
          for n1 in neuronIndices:
              for n2 in neuronIndices:
-                 W = np.sum( np.multiply(self._neurons[n1].r, self._neurons[n2].l) )
+                 W = np.sum( np.multiply(self._neurons[n1].r, self._neurons[n2].l))
                  connectionWeight = np.exp(A* W) / (B + np.exp(A*W))
+                 if connectionWeight <= 1.0/20.0: connectionWeight = 0
                  self.connectNeurons(n1,n2,connectionWeight)
 
          #Create I
@@ -405,8 +402,8 @@ class Network:
          newI = np.sum(self.S[self.fired],axis=0)
          self.I = self.kSynapseDecay*self.I + newI
 
-         self.v=self.v+0.5*(0.04*(self.v**2) + 5*self.v + 140-self.u + self.I)
-         self.v=self.v+0.5*(0.04*(self.v**2) + 5*self.v + 140-self.u + self.I)
+         self.v=self.v+0.5*(0.04*(self.v**2) + 5*self.v + 140-self.u + self.I*15.0)
+         self.v=self.v+0.5*(0.04*(self.v**2) + 5*self.v + 140-self.u + self.I*15.0)
 
          self.u=self.u+self.a*(self.b*self.v - self.u)
 

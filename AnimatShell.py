@@ -69,7 +69,6 @@ class WheelAnimat(Animat):
         eTime = time.clock()
         self.benchmark.append(eTime-sTime)
 
-
     def copyDynamicState(self):
         state = []
         state.append(self.cMotionEnergy)
@@ -156,12 +155,6 @@ class WheelAnimat(Animat):
         
     # 'Eat' if at food    
     def eat(self, foods):
-        #food_loc = [food.getPos() for food in foods]
-        #food_amt = [food.getAmount() for food in foods]
-        #print food_amt
-
-        #food_dist = scipy.spatial.distance.cdist(np.array([self.pos]), food_loc)
-        #possibleFoods = np.logical_and(food_dist[0] < .5, food_amt > 0).nonzero()[0]  #this [0] is b/c nonzero returns list
         possibleFoods = []
         for i,food in enumerate(foods):
             x1,y1 = self.pos

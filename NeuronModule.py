@@ -124,6 +124,7 @@ class Neuron(object):
     def addAxon(self, synapse):
         self.axon.append(synapse)
 
+    #NOT USED
     def tryConnection(self, postNeuronTuple):
         index, postNeuron = postNeuronTuple
         if isinstance(postNeuron, ExcitatoryNeuron):
@@ -223,20 +224,6 @@ class MotorNeuron(Neuron):
 
     def getDrive(self,dt):
         return 0
-
-    #def fire(self):
-    #     super.fire();
-    #     # should get an angle in radians for the wheel to move a specified distance around the other MotorNeuron
-    #     float theta = ( (ANOTHER_CONSTANT / square_root(power(this.location.X - OTHER_MOTOR_NEURON.location.X, 2) + power(this.location.Y - OTHER_MOTOR_NEURON.location.Y,2));
-
-    #     //sets the origin to a new Point rotated by theta around the other MotorNeuron
-    #     NeuralNetwork.location = rotatePoint(NeuralNetwork.location, OTHER_MOTOR_NEURON.location, theta);
-
-    #     this.orientation += theta;  //not sure if this works but basically it needs to change the orientation based on how it rotated
-
-    #     //something to 'wind up' the rotation if it is not in 0, 2PI
-     #    if (theta > 2*PI) theta -= 2*PI;
-      #   else if(theta < 0) theta += 2*PI;
 
 
 class SensoryNeuron_A(Neuron):
