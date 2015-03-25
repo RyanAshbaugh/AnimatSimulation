@@ -7,12 +7,12 @@ so task distribution needs to handled differently, no need for cluster driver
 
 '''
 import clusterDriver as cd
-import spur
+import spur # SSH client
 import pp
 import os
 import numpy as np
 import random
-import json
+import json # for saving objects ... may not be used
 import SimParam
 import operator
 import math
@@ -27,31 +27,27 @@ class EvoDriver():
         self.IDcntr = 1          #keeps track so each animat gets unique id number
         self.worlds = []         #list of world configurations
         self.aType = "Wheel Animat"
-        self.origin = (1,0)
-        self.cal = 1
-        self.inhib = [80,.02,.25,-65,2] #number of neurons and izekevich parameters ... not used now
-        self.excit = [320,.02,.2,-65,8]
+        self.origin = (0,0) # starting position 
+        self.cal = 1 # to be changed - used in food
+        #self.inhib = [80,.02,.25,-65,2] #number of neurons and izekevich parameters ... not used now
+        #self.excit = [320,.02,.2,-65,8]
         # food locations for standard 'worlds'
         fLocs1 = [(1,0),(-1,0),(0,1),(0,-1),(0,2),(0,-2),(2,0),(-2,0),(4,0),(-4,0),(0,4),(0,-4),(0,7),(7,0),(-7,0)]
         fLocs2 = [(1,1),(2,2),(3,3),(4,4),(3,5),(2,6),(1,7),(0,8),(-2,6),(-4,4),(-6,2),(-8,0),(-5,0),(-2,-3),(-5,-5)]
         fLocs3 = [(-2,2),(-1,0),(1,0),(-1,0),(2,-2),(3,5),(-5,5),(-8,8),(10,10),(-10,10),(10,-10),(0,-1),(0,-2),(0,-3),(0,-4)]
-        #fLocs4 = [(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(20)]
-        #fLocs5 = [(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(20)]
         self.worlds.append([1,15,20,fLocs1]) #number of animats,number of foods, world size, food locations
         self.worlds.append([1,15,20,fLocs2])
         self.worlds.append([1,15,20,fLocs3])
-        #self.worlds.append([1,20,20,fLocs4])
-        #self.worlds.append([1,20,20,fLocs5])
-
+       
         #EvoDriver Variables
-        self.cycleNum = 2       #how many cycles on main loop
+        self.cycleNum = 2       #set how many generations to run in evolution
         self.reRankNum = 100      #how many new animats to run before reRanking
-        self.nodeNum = 8         #how many nodes on cluster
+        self.nodeNum = 8         #how many nodes on cluster - for load-balancing - ADJUST for new hardware
         self.maxAnimats = 1000    #how large list of parameters should be
         self.newGenSize = 100    #how many new animats to generate each iteration of evo alg
         ## NOTE when adding metrics to toTrack, make sure they are included in Simulation.filterResults
-        self.toTrack = ["Energy","FoodsEaten","FindsFood","NetworkDensity","FiringRate","TotalMove"]  #list of metrics to track
-        self.nodeP2Ps = [("10.2.1." + str(i) + ":60000") for i in xrange(2,12)]     #P2P address for each node on cluste
+        self.toTrack = ["Energy","FoodsEaten","FindsFood","NetworkDensity","FiringRate","TotalMove"]  #names of metrics to track - keys to dictionary
+        self.nodeP2Ps = [("10.2.1." + str(i) + ":60000") for i in xrange(2,12)]     #Cluster-specific P2P (peer-to-peer) address for each node on cluster (now dogwoord)
         self.js = pp.Server(ncpus=0,ppservers=tuple(self.nodeP2Ps[0:8]))
         self.L = 3                #used for network connection probability
         self.K = 5                #used for network connectino probability
