@@ -29,8 +29,9 @@ class EvoDriver():
         self.aType = "Wheel Animat"
         self.origin = (1,0)
         self.cal = 1
-        self.inhib = [80,.02,.25,-65,2] #number of and izekevich parameters
+        self.inhib = [80,.02,.25,-65,2] #number of neurons and izekevich parameters ... not used now
         self.excit = [320,.02,.2,-65,8]
+        # food locations for standard 'worlds'
         fLocs1 = [(1,0),(-1,0),(0,1),(0,-1),(0,2),(0,-2),(2,0),(-2,0),(4,0),(-4,0),(0,4),(0,-4),(0,7),(7,0),(-7,0)]
         fLocs2 = [(1,1),(2,2),(3,3),(4,4),(3,5),(2,6),(1,7),(0,8),(-2,6),(-4,4),(-6,2),(-8,0),(-5,0),(-2,-3),(-5,-5)]
         fLocs3 = [(-2,2),(-1,0),(1,0),(-1,0),(2,-2),(3,5),(-5,5),(-8,8),(10,10),(-10,10),(10,-10),(0,-1),(0,-2),(0,-3),(0,-4)]
