@@ -47,10 +47,10 @@ class EvoDriver():
         self.newGenSize = 100    #how many new animats to generate each iteration of evo alg
         ## NOTE when adding metrics to toTrack, make sure they are included in Simulation.filterResults
         self.toTrack = ["Energy","FoodsEaten","FindsFood","NetworkDensity","FiringRate","TotalMove"]  #names of metrics to track - keys to dictionary
-        self.nodeP2Ps = [("10.2.1." + str(i) + ":60000") for i in xrange(2,12)]     #Cluster-specific P2P (peer-to-peer) address for each node on cluster (now dogwoord)
-        self.js = pp.Server(ncpus=0,ppservers=tuple(self.nodeP2Ps[0:8]))
-        self.L = 3                #used for network connection probability
-        self.K = 5                #used for network connectino probability
+        self.nodeP2Ps = [("10.2.1." + str(i) + ":60000") for i in xrange(2,12)]     #Cluster-specific P2P (peer-to-peer) address for each node on cluster (now dogwood) ...NB must change this for other clusters
+        self.js = pp.Server(ncpus=0,ppservers=tuple(self.nodeP2Ps[0:8])) # prevents PP from using nodes on job server 
+        self.L = 6                #number of parameter pairs used for constructing network connection weights
+        self.K = 3                # number of location parameters for each parameter
         self.animats = []         #list of simParams
         self.results = []         #all results returned from Simulation, used to rank Animats on performance
         self.genData = []         #holds max,min,mean,sd,scores of each generation
