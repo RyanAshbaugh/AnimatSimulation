@@ -26,7 +26,6 @@ class World:
         self.numBounds = [0 - self.arenaSize[0]/2., 0 + self.arenaSize[0]/2.,0 - self.arenaSize[1]/2., 0 + self.arenaSize[1]/2.]
         self.animats = []
         for x in range(1,self.sP.getAnimNum(1)+1):
-            id = "Animat " + str(x)
             self.animats.append(AnimatShell.WheelAnimat(self.sP.getAnimParams(x)))
         self.smells = []
         self.foods = self.setup_food()
@@ -37,7 +36,6 @@ class World:
         for i,loc in enumerate(food_loc):
             if i > len(food_loc)*.75: foods.append(Stimuli.Food_B(loc))
             else: foods.append(Stimuli.Food_A(loc))
-            #foods.append(Stimuli.Food_A(loc))
         return foods
 
     def determineTraction(self,pos):

@@ -24,17 +24,15 @@ class Animat():
     #constructor
     #**kwargs
     #  startPos : takes (x,y) coordinate for starting position
-    def __init__(self,(id,type,origin,cal,inhib,excit,aa,bb)):
+    def __init__(self,(id,origin,aa,bb)):
 
-        self.net = NetworkModule.Network(inhib,excit,aa,bb)
+        self.net = NetworkModule.Network(aa,bb)
         self.net.generateNeurons()
-        #self.net.populateTestNetwork()
         self.net.connectNetwork()
-        #self.net.connectTestNetwork()
         self.pos = np.array([origin[0], origin[1]])
         self.id = id
         self.direc = np.pi/2.0
-        self.Eating = False #does not start eating
+        self.Eating = False
         self.Energy = 200
         self.hungerThreshold = .75 * self.Energy
         self.maxInputStrength = np.ones(self.net.totalNum)*200.
@@ -54,13 +52,12 @@ class WheelAnimat(Animat):
     #  origin : takes (x,y) coordinate for starting position
     #  rad : sets the radius of the animat
     #  cal : sets amt of energy in an item of food
-    def __init__(self,(id,type,origin,cal,inhib,excit,aa,bb),rad=1):
-        Animat.__init__(self,(id,type,origin,cal,inhib,excit,aa,bb))
+    def __init__(self,(id,origin,aa,bb),rad=1):
+        Animat.__init__(self,(id,origin,aa,bb))
         self.radius = rad
         self.motors = np.array([[0],[0]])
         self.cMotionEnergy = 0.01 # convert motion into energy expended in calories / (mm/sec)
         self.kBasalEnergy = 0.01
-        self.Calories = cal # how much energy in a unit amount of food
         self.benchmark = []
 
     def runNetwork(self, t, dt):
@@ -74,7 +71,6 @@ class WheelAnimat(Animat):
         state.append(self.cMotionEnergy)
         state.append(self.kBasalEnergy)
         state.append(self.Energy)
-        state.append(self.Calories)
         state.append(self.pos.copy())
         state.append(self.direc)
         state.append(self.Eating)
@@ -87,12 +83,11 @@ class WheelAnimat(Animat):
         self.cMotionEnergy = state[0]
         self.kBasalEnergy = state[1]
         self.Energy = state[2]
-        self.Calories = state[3]
-        self.pos = state[4]
-        self.direc = state[5]
-        self.Eating = state[6]
-        self.net.loadDynamicState(state[7])
-        self.benchmark = state[8]
+        self.pos = state[3]
+        self.direc = state[4]
+        self.Eating = state[5]
+        self.net.loadDynamicState(state[6])
+        self.benchmark = state[7]
        
         
     def move(self, trac, t):

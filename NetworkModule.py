@@ -22,7 +22,7 @@ import SimParam
 class Network:
 
     #kwargs used for evo driver
-     def __init__(self,inhib,excit,aa,bb):
+     def __init__(self,aa,bb):
          #some constants/tracking numbers
          self.FIRED_VALUE = 30
          self.DT = 1
@@ -33,9 +33,8 @@ class Network:
          self.numSensory_B = 0
          self.numHunger = 0
          self.totalNum = 0
-         self.inhibParams = inhib
-         self.excitParams = excit
          self.imported = False
+         self.voltIncr = 15.0     #S matrix contains connection weights too small to be used as voltage,
 
          self.kSynapseDecay = 0.7
 
@@ -77,14 +76,6 @@ class Network:
          self.sensitivity_B = np.array([], ndmin = 2)
 
 
-         #Network connection variables
-         self.Lnum = 3      #ligand number
-         self.Rnum = 3      #receptor number
-         self.ligands = []  #holder for ligands of each neuron
-         self.receptors = [] #holder for receptors of each neuron
-         self.aa = -1 if aa is None else aa
-         self.bb = -1 if bb is None else bb
-
 
      def findLRGradient(self):
          pass
@@ -101,10 +92,10 @@ class Network:
              loc = self.numInhibitory
              self._neurons.insert(loc, InhibitoryNeuron(pos[0], pos[1], 0))
              self.inhibitoryNeurons = np.append(self.inhibitoryNeurons, loc)
-             self.a = np.insert(self.a, loc, self.inhibParams[1]+0.08*0.5)   #inhibParams[1] = a
-             self.b = np.insert(self.b, loc, self.inhibParams[2]-0.05*0.5)
-             self.c = np.insert(self.c, loc, self.inhibParams[3])
-             self.d = np.insert(self.d, loc, self.inhibParams[4])
+             self.a = np.insert(self.a, loc, 0.02)
+             self.b = np.insert(self.b, loc, 0.2)
+             self.c = np.insert(self.c, loc, -65)
+             self.d = np.insert(self.d, loc, 8)
              self.v = np.insert(self.v, loc, -65)
              self.numInhibitory += 1
 
@@ -118,10 +109,10 @@ class Network:
              loc = self.numExcitatory + self.numInhibitory
              self._neurons.insert(loc, ExcitatoryNeuron(pos[0], pos[1], 0))
              self.excitatoryNeurons = np.append(self.excitatoryNeurons, loc)
-             self.a = np.insert(self.a, loc, self.excitParams[1])
-             self.b = np.insert(self.b, loc, self.excitParams[2])
-             self.c = np.insert(self.c, loc, self.excitParams[3])
-             self.d = np.insert(self.d, loc, self.excitParams[4])
+             self.a = np.insert(self.a, loc,0.02)
+             self.b = np.insert(self.b, loc, 0.2)
+             self.c = np.insert(self.c, loc, -65)
+             self.d = np.insert(self.d, loc, 8)
              self.v = np.insert(self.v, loc, -65)
              self.numExcitatory += 1
 
@@ -216,7 +207,7 @@ class Network:
          #self.firingCount_decay = np.array([])
          #self.fireTogetherCount_decay = np.array([])
 
-         self.u=self.b*self.v;
+         self.u=self.b*self.v
 
      def generateNeurons(self):
          #Generate neurons around the circle
@@ -353,6 +344,7 @@ class Network:
          n2 = self._neurons[i2]
          return np.sqrt((n1.X-n2.X)**2 + (n1.Y-n2.Y)**2)
 
+    #NOT USED
      def getAverageExcitatoryVoltage(self):
         self.sumVoltage = 0
         for x in range (0, len(self._neurons)):
@@ -377,19 +369,11 @@ class Network:
 
          return self._neurons
 
-     def _compile_network(self):
-         pass
 
-
-
-#TRACK U--OLD!!
      def runNetwork(self,t,dt):
-         if t == 0: self._compile_network()
-
          #self.fireTogetherCount *= self.fireTogetherCount_decay
          #self.recentlyFired[self.recentlyFired > 0] -= 1
 
-         #Vectorized Izhikevich model: self.I matrix set through Animat.smell()
          self.fired = (self.v >= 30).nonzero()[0]
          self.recentlyFired[self.fired] = 20
 
@@ -399,16 +383,13 @@ class Network:
          self.v[self.fired] = self.c[self.fired]
          self.u[self.fired]= self.u[self.fired] + self.d[self.fired]
 
-         newI = np.sum(self.S[self.fired],axis=0)
+         newI = np.sum(self.S[self.fired],axis=0) * self.voltIncr
          self.I = self.kSynapseDecay*self.I + newI
 
-         self.v=self.v+0.5*(0.04*(self.v**2) + 5*self.v + 140-self.u + self.I*15.0)
-         self.v=self.v+0.5*(0.04*(self.v**2) + 5*self.v + 140-self.u + self.I*15.0)
+         self.v=self.v+0.5*(0.04*(self.v**2) + 5*self.v + 140-self.u + self.I)
+         self.v=self.v+0.5*(0.04*(self.v**2) + 5*self.v + 140-self.u + self.I)
 
          self.u=self.u+self.a*(self.b*self.v - self.u)
-
-
-
 
 
      #uses voltages of firing motorNeurons to return new motor data

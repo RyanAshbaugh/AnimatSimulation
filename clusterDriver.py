@@ -1,17 +1,4 @@
-'''
-This will be the driver file(object) to run on each node
 
-All simulation modules (AnimatShell,SimulationEngine,NetworkModule, etc) will need to be included in this
-python file. The reason being that it avoids having to pass all function/library dependecies to pp when running
-simulations.
-
-Note that for now it outputs to text file, however this is incredibly slow when including all network variables,
-so eventually be switched to output to list via callback function in pp
-
-
-
-
-'''
 
 __author__ = 'RJ'
 import numpy as np
@@ -22,7 +9,7 @@ import clusterSimEngine
 import SimParam
 import random
 
-## wrapper class for "main method" of driver
+
 class ClusterDriver():
 
     def __init__(self,id,parameters,animatParams,writeInt,writeFiles=True,time=1000):
@@ -31,32 +18,17 @@ class ClusterDriver():
         self.simulations = []
         self.results = []
         self.animatParams = [animatParams]
-        #parameters = [1,15,20]             #[animNum,foodNum,worldSize]
-        #animatParams = [["Wheel Animat",(1,0),10,[80,.02,.25,-65,2],[320,.02,.2,-65,8]]]
         for i,param in enumerate(parameters):
             self.simulations.append(Simulation(self.id,i+1,param,self.animatParams,time,writeInterval=self.writeInt,writeFiles=writeFiles))
-
-        # self.sim1 = Simulation(self.id,1,parameters,animatParams,3000,writeInterval=50)
-        # self.sim2 = Simulation(self.id,2,parameters,animatParams,2000,writeInterval=500)
-        # self.sim3 = Simulation(self.id,3,parameters,animatParams,3500,writeInterval=500)
-        #set up pp
-        modules = ("clusterDriver","AnimatShell","NetworkModule","NeuronModule","clusterSimEngine","Stimuli",
-                   "SynapseModule","World","time","random","math","scipy.spatial","numpy")
-	
-
 
     def startNode(self):
         jobServer = pp.Server()
         jobs = []
         for sim in self.simulations:
-            jobs.append(jobServer.submit(sim.startSimulation),args=(["Energy","FoodDist"],))
-
-        print "cluster stats"
+            jobs.append(jobServer.submit(sim.startSimulation,args=(["Energy","FoodDist"],)))
         for job in jobs:
             self.results.append(job())
         print "finished"
-        #sim = Simulation(self.id,1,parameters,animatParams,1000,writeInterval=500)
-        #sim.startSimulation()
         print "cluster stats"
         jobServer.print_stats()
         jobServer.destroy()
@@ -69,7 +41,6 @@ class EvoClusterDriver():
         ## Other variables
         self.id = id       #used for generating animat ids
         self.sims = []     #holder for all simulation objects
-        self.template = ["Wheel Animat",(1,0),10,[80,.02,.25,-65,2],[320,.02,.2,-65,8]]  #used for formatting animParams to pass to SimEngine
         self.results = []  #holder for results of
         self.metrics = metrics   #list of metrics to track
         self.simParams = simParams  #list of simParam objects for each simulation
@@ -96,25 +67,17 @@ class EvoClusterDriver():
 class Simulation():
 
     def __init__(self,clusterId,simId,simParam,runTime,writeInterval=25,evo=False,writeFiles=True):
-        #print simParam.getAnimParams(1)
-        #self.simEngine = SimulationEngine()     #handles control of world
         self.writeFiles = writeFiles
         self.evo = evo
         self.simEngine = clusterSimEngine.clusterSimEngine()
         self.sP = simParam
-        # self.parameters = params                #[AnimNum,foodNum,WorldSize]
-        # self.animatParams = animParams          #[type,origin,cal,inhib,excit]
         self.runTime = runTime                  # how many "cycles" simEngine will run (time = ms?)
         self.writeInterval = writeInterval      # how often simEngine will save state to buffer
-        self.logFile = 0    #logfile for state data
+        self.logFile = 0                        #logfile for state data
         self.lastLogged = -1                    # keeps track of last state written to file
-        #initialize a list with placeholders for each state, thus can store in order
-        #self.simHistory = [-1 for i in xrange((self.runTime/self.writeInterval)+1)]  # +1 b/c of initial time (t=0)
         self.simHistory = []
-        #self.startSimulation()
         self.id = simId
         self.clusterId = clusterId
-
 
 
     def startSimulation(self,metrics):
@@ -172,7 +135,6 @@ class Simulation():
                 newDist = self.minFoodDist(s)
                 if newDist < prevDist: score += np.abs(prevDist-newDist)
                 else: score -= np.abs(prevDist-newDist)
-                #else: score -= np.abs(prevDist-newDist)
                 prevDist = newDist
         return score
 
@@ -229,4 +191,3 @@ class Simulation():
 
 
 
-#ClusterDriver()

@@ -21,9 +21,6 @@ class clusterSimEngine():
         self.writeInterval = 500   # store every 500 "cycles" = 500 simulated ms
         self.world = 0             # place holder for world variable
         self.foodLocs = 0
-        #self.jobServer = pp.Server()
-        #print "simEngine"
-        #self.jobServer.print_stats()
 
 
     def initializeEngine(self,simParam,simLength):
@@ -37,9 +34,6 @@ class clusterSimEngine():
 
 
     def simulate(self,t):
-        #modules = ("numpy","AnimatShell","Stimuli","random","NeuronModule")
-        #update = jobServer.submit(self.world.update,args=(t,self.timeStep),modules=modules)
-        #results = update()
         self.world.update(t,self.timeStep)
         if (t%self.writeInterval == 0):
             self.stateList.append((t,self.world.copyDynamicState()))

@@ -107,6 +107,7 @@ class Neuron(object):
     def receivePSP(self, pspAmount):
         self.inputs+=pspAmount
 
+    #NOT USED
     def update(self, dt):
         self.I = self.getDrive(dt) + self.inputs
         #print "I = " + str(self.I)
@@ -118,9 +119,11 @@ class Neuron(object):
 
         self.inputs = 0
 
+    #Only used by update, which is not used
     def getDrive(self, dt):
         return 0
 
+    #NOT USED
     def addAxon(self, synapse):
         self.axon.append(synapse)
 
@@ -157,6 +160,7 @@ class Neuron(object):
         if self.membranePotential > self.FIRED_VALUE:
             self.fire()
 
+    #Not used
     def hasFired(self):
         return self.membranePotential > self.FIRED_VALUE
 

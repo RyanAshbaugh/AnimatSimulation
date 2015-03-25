@@ -29,8 +29,6 @@ class EvoDriver():
         self.aType = "Wheel Animat"
         self.origin = (0,0) # starting position 
         self.cal = 1 # to be changed - used in food
-        #self.inhib = [80,.02,.25,-65,2] #number of neurons and izekevich parameters ... not used now
-        #self.excit = [320,.02,.2,-65,8]
         # food locations for standard 'worlds'
         fLocs1 = [(1,0),(-1,0),(0,1),(0,-1),(0,2),(0,-2),(2,0),(-2,0),(4,0),(-4,0),(0,4),(0,-4),(0,7),(7,0),(-7,0)]
         fLocs2 = [(1,1),(2,2),(3,3),(4,4),(3,5),(2,6),(1,7),(0,8),(-2,6),(-4,4),(-6,2),(-8,0),(-5,0),(-2,-3),(-5,-5)]
@@ -49,8 +47,8 @@ class EvoDriver():
         self.toTrack = ["Energy","FoodsEaten","FindsFood","NetworkDensity","FiringRate","TotalMove"]  #names of metrics to track - keys to dictionary
         self.nodeP2Ps = [("10.2.1." + str(i) + ":60000") for i in xrange(2,12)]     #Cluster-specific P2P (peer-to-peer) address for each node on cluster (now dogwood) ...NB must change this for other clusters
         self.js = pp.Server(ncpus=0,ppservers=tuple(self.nodeP2Ps[0:8])) # prevents PP from using nodes on job server 
-        self.L = 6                #number of parameter pairs used for constructing network connection weights
-        self.K = 3                # number of location parameters for each parameter
+        self.L = 3                #number of parameter pairs used for constructing network connection weights
+        self.K = 6                # number of location parameters for each parameter
         self.animats = []         #list of simParams
         self.results = []         #all results returned from Simulation, used to rank Animats on performance
         self.genData = []         #holds max,min,mean,sd,scores of each generation
@@ -78,7 +76,6 @@ class EvoDriver():
     def run(self,genNum=0):
         for g in xrange(genNum,self.cycleNum):
             print "Starting generation " + str(g+1) + " of " + str(self.cycleNum)
-            #since animat list is only reRanked every x amount of times, run top x animats in parallel
             babies = self.mutate(self.animats[-self.reRankNum:]) #take top ranked animats and mutate
             self.randomizeWorlds(self.animats)                   #make sure random worlds change each generation
             self.animats = self.animats + babies
@@ -183,7 +180,6 @@ class EvoDriver():
         simsPerNode = len(animats)/self.nodeNum              #evenly distribute number of simulations on each node
         extra = len(animats) % self.nodeNum
         nodeDrivers = []
-        #animList = self.getAnimList(animats)
         for i in xrange(self.nodeNum):                          #need to create driver loaded with animats for each node
             temp = animats[i*simsPerNode:(i+1)*simsPerNode]#extract animats to run on current driver
             nodeDrivers.append(cd.EvoClusterDriver(i+1,temp,self.toTrack))
@@ -271,30 +267,10 @@ class EvoDriver():
 
     # Used for saving basic generation data in order to recover simulation if error occurs or connection breaks
     def saveGen(self,genNum):
-        # animats = [anim.getAnimParams(1) for anim in self.animats]
-        # animatHist = [[anim.getAnimParams(1) for anim in gen] for gen in self.animatHistory]
-        # data = [genNum,animats,animatHist,self.results,self.genData,self.resultsHistory]
-        # with open('gen.txt','w') as f:
-        #     json.dump(data,f)
         with open('gen.txt','w') as f:
             cPickle.dump((genNum,self.animats,self.animatHistory,self.results,self.genData,self.resultsHistory),f)
 
     def loadGen(self):
-        # with open('gen.txt','r') as f:
-        #     data =  json.load(f)
-        # #Rebuild animat list
-        # animats = []
-        # for anim in data[1]:
-        #     sP = SimParam.SimParam()
-        #     for j,world in enumerate(self.worlds): sP.setWorld(j+1,world[0],world[1],world[2],world[3])
-        #     sP.setAnimParams(1,anim[0],anim[1],anim[2],anim[3],anim[4],anim[5])
-        #     sP.setAA(1,anim[6])
-        #     sP.setBB(1,anim[7])
-        #     animats.append(sP)
-        # self.animats = animats
-        # self.IDcntr = max(animats,key= lambda x: x.getID(1)).getID(1)
-        #
-        # self.results,self.genData,self.resultsHistory,self.animatHistory = data[3:]
         with open('gen.txt','r') as f:
              data =  cPickle.load(f)
         self.animats,self.animatHistory,self.results,self.genData,self.resultsHistory = data[1:]

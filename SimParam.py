@@ -14,7 +14,7 @@ class SimParam():
         #general usage vars
         self.worldParams = {1 : (None,None,None,None)}    #animNum,foodNum,worldSize,foodLocs
         ## Note should change calories to be a food/world param
-        self.animatParams = {1 : (None,None,None,None,None,None,None,None)}  #id, type, origin, calories, inhib, excit, aa, bb
+        self.animatParams = {1 : (None,None,None,None)}  #id, origin, aa, bb
 
         #vars for evoDriver usage
         self.worldToRun = 1     #used so World.py knows which world param to extract and use
@@ -57,36 +57,20 @@ class SimParam():
 
     #####  animatParam access methods  ######
 
-    def setAnimParams(self,simid,id,type,origin,cal,inhib,excit):
-        self.animatParams[simid] = (id,type,origin,cal,inhib,excit,None,None)
-
-    def setType(self,id,type):
-        temp = self.animatParams[id]
-        self.animatParams[id] = (temp[0],type,temp[2],temp[3],temp[4],temp[5],temp[6],temp[7])
+    def setAnimParams(self,simid,id,origin):
+        self.animatParams[simid] = (id,origin,None,None)
 
     def setOrigin(self,id,origin):
         temp = self.animatParams[id]
-        self.animatParams[id] = (temp[0],temp[1],origin,temp[3],temp[4],temp[5],temp[6],temp[7])
-
-    def setCalories(self,id,cal):
-        temp = self.animatParams[id]
-        self.animatParams[id] = (temp[0],temp[1],temp[2],cal,temp[4],temp[5],temp[6],temp[7])
-
-    def setInhib(self,id,inhib):
-        temp = self.animatParams[id]
-        self.animatParams[id] = (temp[0],temp[1],temp[2],temp[3],inhib,temp[5],temp[6],temp[7])
-
-    def setExcit(self,id,excit):
-        temp = self.animatParams[id]
-        self.animatParams[id] = (temp[0],temp[1],temp[2],temp[3],temp[4],excit,temp[6],temp[7])
+        self.animatParams[id] = (temp[0],origin,temp[2],temp[3])
 
     def setAA(self,id,aa):
         temp = self.animatParams[id]
-        self.animatParams[id] = (temp[0],temp[1],temp[2],temp[3],temp[4],temp[5],aa,temp[7])
+        self.animatParams[id] = (temp[0],temp[1],aa,temp[3])
 
     def setBB(self,id,bb):
         temp = self.animatParams[id]
-        self.animatParams[id] = (temp[0],temp[1],temp[2],temp[3],temp[4],temp[5],temp[6],bb)
+        self.animatParams[id] = (temp[0],temp[1],temp[2],bb)
 
     def getAnimParams(self,id):
         return self.animatParams[id]
@@ -95,25 +79,13 @@ class SimParam():
     def getID(self,id):
         return self.animatParams[id][0]
 
-    def getType(self,id):
+    def getOrigin(self,id):
         return self.animatParams[id][1]
 
-    def getOrigin(self,id):
+    def getAA(self,id):
         return self.animatParams[id][2]
 
-    def getCalories(self,id):
-        return self.animatParams[id][3]
-
-    def getInhib(self,id):
-        return self.animatParams[id][4]
-
-    def getExcit(self,id):
-        return self.animatParams[id][5]
-
-    def getAA(self,id):
-        return self.animatParams[id][6]
-
     def getBB(self,id):
-        return self.animatParams[id][7]
+        return self.animatParams[id][3]
 
 
