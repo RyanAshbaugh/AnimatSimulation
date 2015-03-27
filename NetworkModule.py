@@ -1,11 +1,7 @@
 
 '''
 Network Module
-Simulates brain, contains all neurons
-
-all data flow operations work correctly, just needs lots of functionality added
-
-
+Simulates 'brain', contains all neurons
 '''
 
 from NeuronModule import InhibitoryNeuron
@@ -21,7 +17,7 @@ import SimParam
 
 class Network:
 
-    #kwargs used for evo driver
+    #key word arguments used for evo driver
      def __init__(self,aa,bb):
          #some constants/tracking numbers
          self.FIRED_VALUE = 30
@@ -33,11 +29,8 @@ class Network:
          self.numSensory_B = 0
          self.numHunger = 0
          self.totalNum = 0
-         self.imported = False
-         self.voltIncr = 15.0     #S matrix contains connection weights too small to be used as voltage,
-
-         self.kSynapseDecay = 0.7
-
+         self.voltIncr = 15.0     # multiplier for weights of S matrix - contains connection weights too small to be used as voltage,
+         self.kSynapseDecay = 0.7 # multiplier for decay of input
 
          #Izhikevich Variables
          self.v = np.array([], dtype = np.float32)
@@ -45,46 +38,34 @@ class Network:
          self.b = np.array([], dtype = np.float32)
          self.c = np.array([], dtype = np.float32)
          self.d = np.array([], dtype = np.float32)
-         self.S = np.array([[]], dtype = np.float32)
-         self.u=self.b*self.v;                 # Initial values of u at ceiling
+         self.S = np.array([[]], dtype = np.float32) # connection matrix: array of arrays (stored by ROWS)
 
-
-         #'Shadow' Variables
+         #'Shadow' Variables - To be used in future versions
          self.fireTogetherCount = np.array([], ndmin = 2, dtype = np.float)
          self.firingCount = np.array([])
          self.recentlyFired = np.array([], dtype = np.float32)
          self.justFired = np.array([], dtype = np.int_, ndmin = 2)
 
-         #'Shadow' Variable assistants
+         #'Shadow' Variable assistants - To be used in future versions
          #self.fireTogetherWindow = np.array([])
          self.firingCount_decay = 0.01
          self.fireTogetherCount_decay = 0.98
 
          #other neuron mappings
-         self._neurons = []
-         self.inhibitoryNeurons = np.array([], dtype=np.int_)
-         self.excitatoryNeurons = np.array([], dtype=np.int_)
+         self._neurons = [] # list to hold neuron objects '_' often used to mean not public - not enforced by Python
+         self.inhibitoryNeurons = np.array([], dtype=np.int_) # indices of I neurons within list above
+         self.excitatoryNeurons = np.array([], dtype=np.int_) # indices of E neurons within list above
          self.motorNeurons = np.array([], dtype=np.int_)
          self.hungerNeurons = np.array([],dtype=np.int_)
 
          #These will be dictionaries of Lists eventually for different types of sensory neurons!
-         self.senseNeurons_A = np.array([], dtype=np.int_)
-         self.senseNeuronLocations_A = np.array([],ndmin=2)
-         self.sensitivity_A = np.array([], ndmin = 2)
+         self.senseNeurons_A = np.array([], dtype=np.int_) # indices into self._neurons list
+         self.senseNeuronLocations_A = np.array([],ndmin=2) # x, y coordinates
+         self.sensitivity_A = np.array([], ndmin = 2) # tuning parameter for sensitivity to smells - now set at 50,000
          self.senseNeurons_B = np.array([], dtype=np.int_)
          self.senseNeuronLocations_B = np.array([],ndmin=2)
          self.sensitivity_B = np.array([], ndmin = 2)
 
-
-
-     def findLRGradient(self):
-         pass
-
-     def findFBGradient(self):
-         pass
-
-     def build_matrices(self):
-         pass
 
      #maybe add to OO... then let the network rebuild..?
      def add_neuron(self, type, pos, sensitivity = 50000):
