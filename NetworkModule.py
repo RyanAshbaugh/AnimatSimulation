@@ -67,11 +67,10 @@ class Network:
          self.sensitivity_B = np.array([], ndmin = 2)
 
 
-     #maybe add to OO... then let the network rebuild..?
      def add_neuron(self, type, pos, sensitivity = 50000):
          if type == 'inhibitory':
-             loc = self.numInhibitory
-             self._neurons.insert(loc, InhibitoryNeuron(pos[0], pos[1], 0))
+             loc = self.numInhibitory # index in list
+             self._neurons.insert(loc, InhibitoryNeuron(pos[0], pos[1], 0)) # 0 is not used?
              self.inhibitoryNeurons = np.append(self.inhibitoryNeurons, loc)
              self.a = np.insert(self.a, loc, 0.02)
              self.b = np.insert(self.b, loc, 0.2)
