@@ -3,7 +3,7 @@
 Network Module
 Simulates brain, contains all neurons
 
-all data flow operations work correctly, just needs lots of functionality added
+
 
 
 '''
@@ -22,7 +22,7 @@ import SimParam
 class Network:
 
     #kwargs used for evo driver
-     def __init__(self,aa,bb):
+     def __init__(self,x0,y0,sigma):
          #some constants/tracking numbers
          self.FIRED_VALUE = 30
          self.DT = 1
@@ -33,10 +33,11 @@ class Network:
          self.numSensory_B = 0
          self.numHunger = 0
          self.totalNum = 0
-         self.imported = False
          self.voltIncr = 15.0     #S matrix contains connection weights too small to be used as voltage,
-
          self.kSynapseDecay = 0.7
+         self.x0 = x0
+         self.y0 = y0
+         self.sigma = sigma
 
 
          #Izhikevich Variables
@@ -46,7 +47,7 @@ class Network:
          self.c = np.array([], dtype = np.float32)
          self.d = np.array([], dtype = np.float32)
          self.S = np.array([[]], dtype = np.float32)
-         self.u=self.b*self.v;                 # Initial values of u at ceiling
+         self.u=self.b*self.v                 # Initial values of u at ceiling
 
 
          #'Shadow' Variables
@@ -75,16 +76,6 @@ class Network:
          self.senseNeuronLocations_B = np.array([],ndmin=2)
          self.sensitivity_B = np.array([], ndmin = 2)
 
-
-
-     def findLRGradient(self):
-         pass
-
-     def findFBGradient(self):
-         pass
-
-     def build_matrices(self):
-         pass
 
      #maybe add to OO... then let the network rebuild..?
      def add_neuron(self, type, pos, sensitivity = 50000):
@@ -234,19 +225,14 @@ class Network:
          C = 1.0
          D = 1.0
 
-         #Set up connection variables
-         #Hardcoded for now, will be set by evo algorithm in future
-         sigma = [[1.0, 1.0, 0.0, 1.0, 1.0], [1.0, 1.0, 1.5, 0.0, 0.0]]    #sigma[0] = r, sigma[1] = l
-         x0 = [[-1.0, 1.0, 0.0, 0.7, -0.7], [-1.0, 1.0, 0.0, 0.0, 0.0]]    #x0[0] = r, x0[1] = l
-         y0 = [[1.0, 1.0, 0.0, -0.7, -0.7], [-1.0, -1.0, -1.0, 0.0, 0.0]] #y0[0] = r, y0[1] = l
-
+         #Set up connection variable
          #set up ligand and receptor lists for each neuron in circle based on aa and bb
          for index in np.hstack((self.excitatoryNeurons,self.senseNeurons_A,self.senseNeurons_B)):
             x, y = self._neurons[index].X, self._neurons[index].Y
             rr,ll = [],[]
             for i in xrange(5):
-                rVal = sigma[0][i] - np.sqrt( np.square(x - x0[0][i]) + np.square(y - y0[0][i]))
-                lVal = sigma[1][i] - np.sqrt( np.square(x - x0[1][i]) + np.square(y - y0[1][i]))
+                rVal = self.sigma[0][i] - np.sqrt( np.square(x - self.x0[0][i]) + np.square(y - self.y0[0][i]))
+                lVal = self.sigma[1][i] - np.sqrt( np.square(x - self.x0[1][i]) + np.square(y - self.y0[1][i]))
                 if rVal < 0.0: rVal = 0.0
                 if lVal < 0.0: lVal = 0.0
                 rr.append(rVal)
@@ -258,8 +244,8 @@ class Network:
             x, y = self._neurons[index].X, self._neurons[index].Y
             rr,ll = [],[]
             for i in xrange(5):
-                rVal = sigma[0][i] - np.sqrt( np.square(x - x0[0][i]) + np.square(y - y0[0][i]))
-                lVal = sigma[1][i] - np.sqrt( np.square(x - x0[1][i]) + np.square(y - y0[1][i]))
+                rVal = self.sigma[0][i] - np.sqrt( np.square(x - self.x0[0][i]) + np.square(y - self.y0[0][i]))
+                lVal = self.sigma[1][i] - np.sqrt( np.square(x - self.x0[1][i]) + np.square(y - self.y0[1][i]))
                 if rVal < 0: rVal = 0
                 if lVal < 0: lVal = 0
                 rr.append(rVal)
@@ -271,8 +257,8 @@ class Network:
          x, y = self._neurons[index].X, self._neurons[index].Y
          rr,ll = [],[]
          for i in xrange(5):
-            rVal = sigma[0][i] - np.sqrt( np.square(x - x0[0][i]) + np.square(y - y0[0][i]))
-            lVal = sigma[1][i] - np.sqrt( np.square(x - x0[1][i]) + np.square(y - y0[1][i]))
+            rVal = self.sigma[0][i] - np.sqrt( np.square(x - self.x0[0][i]) + np.square(y - self.y0[0][i]))
+            lVal = self.sigma[1][i] - np.sqrt( np.square(x - self.x0[1][i]) + np.square(y - self.y0[1][i]))
             if rVal < 0: rVal = 0
             if lVal < 0: lVal = 0
             rr.append(rVal)
@@ -284,8 +270,8 @@ class Network:
          x, y = self._neurons[index].X, self._neurons[index].Y
          rr,ll = [],[]
          for i in xrange(5):
-            rVal = sigma[0][i] - np.sqrt( np.square(x - x0[0][i]) + np.square(y - y0[0][i]))
-            lVal = sigma[1][i] - np.sqrt( np.square(x - x0[1][i]) + np.square(y - y0[1][i]))
+            rVal = self.sigma[0][i] - np.sqrt( np.square(x - self.x0[0][i]) + np.square(y - self.y0[0][i]))
+            lVal = self.sigma[1][i] - np.sqrt( np.square(x - self.x0[1][i]) + np.square(y - self.y0[1][i]))
             if rVal < 0: rVal = 0
             if lVal < 0: lVal = 0
             rr.append(rVal)

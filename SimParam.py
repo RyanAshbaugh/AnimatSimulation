@@ -14,7 +14,7 @@ class SimParam():
         #general usage vars
         self.worldParams = {1 : (None,None,None,None)}    #animNum,foodNum,worldSize,foodLocs
         ## Note should change calories to be a food/world param
-        self.animatParams = {1 : (None,None,None,None)}  #id, origin, aa, bb
+        self.animatParams = {1 : (None,None,None,None,None)}  #id, origin, x0, y0, sigma
 
         #vars for evoDriver usage
         self.worldToRun = 1     #used so World.py knows which world param to extract and use
@@ -57,20 +57,24 @@ class SimParam():
 
     #####  animatParam access methods  ######
 
-    def setAnimParams(self,simid,id,origin):
-        self.animatParams[simid] = (id,origin,None,None)
+    def setAnimParams(self,id,animId,origin):
+        self.animatParams[id] = (animId,origin,None,None,None)
 
     def setOrigin(self,id,origin):
         temp = self.animatParams[id]
-        self.animatParams[id] = (temp[0],origin,temp[2],temp[3])
+        self.animatParams[id] = (temp[0],origin,temp[2],temp[3],temp[4])
 
-    def setAA(self,id,aa):
+    def setX0(self,id,x0):
         temp = self.animatParams[id]
-        self.animatParams[id] = (temp[0],temp[1],aa,temp[3])
+        self.animatParams[id] = (temp[0],temp[1],x0,temp[3],temp[4])
 
-    def setBB(self,id,bb):
+    def setY0(self,id,y0):
         temp = self.animatParams[id]
-        self.animatParams[id] = (temp[0],temp[1],temp[2],bb)
+        self.animatParams[id] = (temp[0],temp[1],temp[2],y0,temp[4])
+
+    def setSigma(self,id,sigma):
+        temp = self.animatParams[id]
+        self.animatParams[id] = (temp[0],temp[1],temp[2],temp[3],sigma)
 
     def getAnimParams(self,id):
         return self.animatParams[id]
@@ -82,10 +86,13 @@ class SimParam():
     def getOrigin(self,id):
         return self.animatParams[id][1]
 
-    def getAA(self,id):
+    def getX0(self,id):
         return self.animatParams[id][2]
 
-    def getBB(self,id):
+    def getY0(self,id):
         return self.animatParams[id][3]
+
+    def getSigma(self,id):
+        return self.animatParams[id][4]
 
 

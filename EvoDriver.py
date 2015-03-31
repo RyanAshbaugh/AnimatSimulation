@@ -48,7 +48,7 @@ class EvoDriver():
         self.nodeP2Ps = [("10.2.1." + str(i) + ":60000") for i in xrange(2,12)]     #Cluster-specific P2P (peer-to-peer) address for each node on cluster (now dogwood) ...NB must change this for other clusters
         self.js = pp.Server(ncpus=0,ppservers=tuple(self.nodeP2Ps[0:8])) # prevents PP from using nodes on job server 
         self.L = 3                #number of parameter pairs used for constructing network connection weights
-        self.K = 6                # number of location parameters for each parameter
+        self.K = 5                # number of location parameters for each parameter
         self.animats = []         #list of simParams
         self.results = []         #all results returned from Simulation, used to rank Animats on performance
         self.genData = []         #holds max,min,mean,sd,scores of each generation
@@ -87,25 +87,23 @@ class EvoDriver():
             self.saveGen(g)                                      #save in case of crash/connection break
 
         #Generates initial animat parameters
-    def generateParams(self,list,size,aa=-1,bb=-1):
+    def generateParams(self,list,size,x0=-1,y0=-1,sigma=-1):
         print "Generating Animats\n"
         for i in xrange(size):
             sP = SimParam.SimParam()
             for j,world in enumerate(self.worlds): sP.setWorld(j+1,world[0],world[1],world[2],world[3])
             sP.setWorld(4,1,15,20,[(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(15)])
             sP.setWorld(5,1,15,20,[(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(15)])
-            sP.setAnimParams(1,self.IDcntr,self.aType,self.origin,self.cal,self.inhib,self.excit)
-            if aa == -1:
-                aa = [[np.random.laplace()*.25 for x in xrange(self.K)] for x in xrange(self.L)] #create LxK arrays
-                bb = [[np.random.laplace()*.25 for x in xrange(self.K)] for x in xrange(self.L)]
-                for x in xrange(self.L):
-                    aa[x][0] = np.sum(np.abs(aa[x][1:]))
-                    bb[x][0] = np.sum(np.abs(bb[x][1:]))
-                sP.setAA(1,aa) #hardcoded for only 1 animat per simulation
-                sP.setBB(1,bb) #hardcoded for only 1 animat per simulation
+            sP.setAnimParams(1,self.IDcntr,self.origin)
+            if x0 == -1:
+                #Unif[a,b), b > a: (b-a)*random + a
+                sP.setX0(1,[[np.random.random_sample()*3.01 - 1.5 for x in xrange(self.K)] for x in xrange(self.L)]) #hardcoded for only 1 animat per simulation
+                sP.setY0(1,[[np.random.random_sample()*3.01 - 1.5 for x in xrange(self.K)] for x in xrange(self.L)]) #hardcoded for only 1 animat per simulation
+                sP.setSigma(1,[[np.random.exponential() for x in xrange(self.K)] for x in xrange(self.L)])
             else:
-                sP.setAA(1,aa)
-                sP.setBB(1,bb)
+                sP.setX0(1,x0) #hardcoded for only 1 animat per simulation
+                sP.setY0(1,y0) #hardcoded for only 1 animat per simulation
+                sP.setSigma(1,sigma)
             list.append(sP)
             self.IDcntr += 1
 
@@ -168,9 +166,10 @@ class EvoDriver():
         for i in xrange(self.newGenSize/2):
             r1 = random.randint(0,len(animats)-1)
             r2 = random.randint(0,len(animats)-1)
-            newaa = self.animats[r1].getAA(1)   #hardcoded for 1 animat per sim
-            newbb = self.animats[r2].getBB(1)   #hardcoded for 1 animat per sim
-            self.generateParams(recomb,1,aa=newaa,bb=newbb)
+            newx0 = self.animats[r1].getX0(1)   #hardcoded for 1 animat per sim
+            newy0 = self.animats[r2].getY0(1)   #hardcoded for 1 animat per sim
+            newsigma = self.animats[r2].getSigma(1)
+            self.generateParams(recomb,1,newx0,newy0,newsigma)
         return randMut+recomb
 
     #Generic version of initRun

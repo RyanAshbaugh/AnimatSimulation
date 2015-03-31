@@ -24,9 +24,9 @@ class Animat():
     #constructor
     #**kwargs
     #  startPos : takes (x,y) coordinate for starting position
-    def __init__(self,(id,origin,aa,bb)):
+    def __init__(self,(id,origin,x0,y0,sigma)):
 
-        self.net = NetworkModule.Network(aa,bb)
+        self.net = NetworkModule.Network(x0,y0,sigma)
         self.net.generateNeurons()
         self.net.connectNetwork()
         self.pos = np.array([origin[0], origin[1]])
@@ -52,8 +52,8 @@ class WheelAnimat(Animat):
     #  origin : takes (x,y) coordinate for starting position
     #  rad : sets the radius of the animat
     #  cal : sets amt of energy in an item of food
-    def __init__(self,(id,origin,aa,bb),rad=1):
-        Animat.__init__(self,(id,origin,aa,bb))
+    def __init__(self,(id,origin,x0,y0,sigma),rad=1):
+        Animat.__init__(self,(id,origin,x0,y0,sigma))
         self.radius = rad
         self.motors = np.array([[0],[0]])
         self.cMotionEnergy = 0.01 # convert motion into energy expended in calories / (mm/sec)
