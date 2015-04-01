@@ -90,7 +90,7 @@ class Network:
              self.v = np.insert(self.v, loc, -65)
              self.numInhibitory += 1
 
-             self.excitatoryNeurons += 1
+             self.excitatoryNeurons += 1 # used to keep track of locations of neuron types for GUIdriver etc
              self.motorNeurons += 1
              self.senseNeurons_A += 1
              self.senseNeurons_B += 1
@@ -202,9 +202,9 @@ class Network:
 
      def generateNeurons(self):
          #Generate neurons around the circle
-         for i in xrange(40):
+         for i in xrange(40): # 0 to 39
              loc = (np.cos(2*np.pi*(i+0.5)/40),np.sin(2*np.pi*(i+0.5)/40))
-             if i < 20:
+             if i < 20: # upper half-circle
                  if i % 2 == 0:
                      self.add_neuron("sensory_A",loc)
                  else:
@@ -218,16 +218,12 @@ class Network:
 
      def connectNetwork(self):
          #Parameters
-         L = 3
-         K = 6
          A = 2.0
          B = 20.0
-         C = 1.0
-         D = 1.0
-
-         #Set up connection variable
-         #set up ligand and receptor lists for each neuron in circle based on aa and bb
-         for index in np.hstack((self.excitatoryNeurons,self.senseNeurons_A,self.senseNeurons_B)):
+        
+         #Set up connection variables
+         #set up ligand and receptor lists for each neuron in circle based on parameters
+         for index in np.hstack((self.excitatoryNeurons,self.senseNeurons_A,self.senseNeurons_B)): # make one list
             x, y = self._neurons[index].X, self._neurons[index].Y
             rr,ll = [],[]
             for i in xrange(5):
@@ -237,7 +233,7 @@ class Network:
                 if lVal < 0.0: lVal = 0.0
                 rr.append(rVal)
                 ll.append(lVal)
-            self._neurons[index].setRL(rr,ll)
+            self._neurons[index].setRL(rr,ll) # setRL method in neuronModule.py
 
          #Set up ligand and receptor lists for each motor neuron and hunger neuron
          for index in self.hungerNeurons:
@@ -281,6 +277,7 @@ class Network:
 
          #Set up connection weights
          neuronIndices = np.hstack((self.excitatoryNeurons,self.senseNeurons_A,self.senseNeurons_B,self.hungerNeurons,self.motorNeurons))
+         # may be simpler to run through all indices in order, since all classes get treated equally
          for n1 in neuronIndices:
              for n2 in neuronIndices:
                  W = np.sum( np.multiply(self._neurons[n1].r, self._neurons[n2].l))
@@ -288,12 +285,12 @@ class Network:
                  if connectionWeight <= 1.0/20.0: connectionWeight = 0
                  self.connectNeurons(n1,n2,connectionWeight)
 
-         #Create I
+         # initialize I
          self.I = 2*np.ones( (self.totalNum), dtype = np.float32 )
 
 
 
-     def copyDynamicState(self):
+     def copyDynamicState(self): # for simulation engine 
          state = []
          state.append(self.a.copy())
          state.append(self.b.copy())
