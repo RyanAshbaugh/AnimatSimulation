@@ -39,7 +39,7 @@ class DevelopmentWindow():
         self.sP.setWorld(3,self.worlds[2][0],self.worlds[2][1],self.worlds[2][2],self.worlds[2][3])
         self.sP.setWorld(4,self.worlds[3][0],self.worlds[3][1],self.worlds[3][2],self.worlds[3][3])
         self.sP.setWorld(5,self.worlds[4][0],self.worlds[4][1],self.worlds[4][2],self.worlds[4][3])
-        self.sP.setAnimParams(1,1,"Wheel Animat",(0,0),1,[80,.02,.25,-65,2],[320,.02,.2,-65,8])
+        self.sP.setAnimParams(1,1,(0,0))
         self.paused = True                     #paused?
         self.lastTime = 0
         self.sim_msps = 0
