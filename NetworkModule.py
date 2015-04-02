@@ -267,7 +267,8 @@ class Network:
          for n1 in neuronIndices:
              for n2 in neuronIndices:
                  W = np.sum( np.multiply(self._neurons[n1].r, self._neurons[n2].l))
-                 connectionWeight = np.exp(A* W) / (B + np.exp(A*W))
+                 connectionWeight = np.exp(A* W) / (B + np.exp(A*W)) 
+                 ### bring in multiplier from runNetwork
                  if connectionWeight <= 1.0/20.0: connectionWeight = 0
                  self.connectNeurons(n1,n2,connectionWeight)
 
@@ -276,7 +277,7 @@ class Network:
 
 
 
-     def copyDynamicState(self): # for simulation engine 
+     def copyDynamicState(self): # copies all data for simulation engine 
          state = []
          state.append(self.a.copy())
          state.append(self.b.copy())
@@ -288,10 +289,10 @@ class Network:
          try:
              state.append(self.I.copy())
          except AttributeError:
-             pass #means its first frame and I has not been set yet
+             pass #means its first frame and I has not been set yet ... should be fixed if Initialize() method is made
          return state
 
-     def loadDynamicState(self, state):
+     def loadDynamicState(self, state): # for GUI: after pause, allows one to load back previously copied state
          self.a = state[0]
          self.b = state[1]
          self.c = state[2]
@@ -305,28 +306,13 @@ class Network:
              pass #not set yet
 
 
-     def connectNeurons(self, n1, n2, dV = 100):
+     def connectNeurons(self, n1, n2, dV = 100): # put directly into connectNetwork
          self.S[n1, n2] = dV
 
-     def get_dist(self, i1, i2):
-         n1 = self._neurons[i1]
-         n2 = self._neurons[i2]
-         return np.sqrt((n1.X-n2.X)**2 + (n1.Y-n2.Y)**2)
-
-    #NOT USED
-     def getAverageExcitatoryVoltage(self):
-        self.sumVoltage = 0
-        for x in range (0, len(self._neurons)):
-            if isinstance(self._neurons[x], ExcitatoryNeuron):
-                self.sumVoltage += self.neuron.getMembranePotential()
-        return self.sumVoltage/len(self._neurons)
-
-     def get_neurons_firing(self):
+    def get_neurons_firing(self): # used in GUI driver to change colors
          return (self.v >= self.FIRED_VALUE).nonzero()
 
-     def getNeurons(self):
-
-         #populates neuron objects with vectorized data so that upper levels can use them in an OO manner
+     def getNeurons(self):  #populates neuron objects with vectorized data so that upper levels (e.g. GUIDriver) can use them in an OO manner
          for i in range(0, len(self._neurons)):
              self._neurons[i].index = i
              self._neurons[i].a = self.a[i]
@@ -339,15 +325,10 @@ class Network:
          return self._neurons
 
 
-     def runNetwork(self,t,dt):
-         #self.fireTogetherCount *= self.fireTogetherCount_decay
-         #self.recentlyFired[self.recentlyFired > 0] -= 1
+     def runNetwork(self,t,dt): # runs Izhikevich model code
 
-         self.fired = (self.v >= 30).nonzero()[0]
+         self.fired = (self.v >= 30).nonzero()[0] # .nonzero() returns indices from 1/0 (T/F) of v >= 30
          self.recentlyFired[self.fired] = 20
-
-         #self.fireTogetherCount[np.ix_((self.recentlyFired > 0) & (self.recentlyFired < 20), self.recentlyFired == 20)] += 1
-         #self.S[(self.fireTogetherCount > 3) & (np.abs(self.S) < 5)] += 1
 
          self.v[self.fired] = self.c[self.fired]
          self.u[self.fired]= self.u[self.fired] + self.d[self.fired]
@@ -361,7 +342,8 @@ class Network:
          self.u=self.u+self.a*(self.b*self.v - self.u)
 
 
-     #uses voltages of firing motorNeurons to return new motor data
+     #uses voltages of firing motorNeurons to return new motor data to determine wheel (called in animatMovement)
+     # NEEDS attention
      def getMotorData(self):
 
          newM1 = 0 if(self.v[self.motorNeurons[0]] <= 30) else (self.v[self.motorNeurons[0]])/30 + 30
