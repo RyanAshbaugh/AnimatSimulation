@@ -8,7 +8,6 @@ Base Class for Animat Object
 """
 
 import numpy as np
-#from numpy import *
 import math as math
 import scipy.spatial
 import time
@@ -22,7 +21,6 @@ import SimParam
 class Animat():
     
     #constructor
-    #**kwargs
     #  startPos : takes (x,y) coordinate for starting position
     def __init__(self,(id,origin,x0,y0,sigma)):
 
@@ -35,30 +33,22 @@ class Animat():
         self.Eating = False
         self.Energy = 200
         self.hungerThreshold = .75 * self.Energy
-        self.maxInputStrength = np.ones(self.net.totalNum)*200.
-        #self.image = pygame.image.load("roomba.png").convert_alpha()
-    
-    #**kwarg defaulted to return current frame data, change if need other frames data(proabably for testing)
-    #def getPosition(self):
-        #current position will always be last coordinates stored, returns 2 tuple (xCoord,Ycoord)
-    #    return self.pos
-        
-        
+
 ##################### Wheel Animat Class ######################################################
     ##Simplest Type of Animat, Conists of circular body with 2 "wheels" for movement##        
 class WheelAnimat(Animat):
     
-    #constructor **kwargs
+    #constructor keyword arguments
     #  origin : takes (x,y) coordinate for starting position
     #  rad : sets the radius of the animat
     #  cal : sets amt of energy in an item of food
     def __init__(self,(id,origin,x0,y0,sigma),rad=1):
         Animat.__init__(self,(id,origin,x0,y0,sigma))
         self.radius = rad
-        self.motors = np.array([[0],[0]])
-        self.cMotionEnergy = 0.01 # convert motion into energy expended in calories / (mm/sec)
-        self.kBasalEnergy = 0.01
-        self.benchmark = []
+        self.motors = np.array([[0],[0]]) # how fast the motors are running
+        self.cMotionEnergy = 0.01 # coefficient to convert motion into energy expended in calories 
+        self.kBasalEnergy = 0.01 # rate of burning energy 'at rest'
+        self.benchmark = [] # storage for times determined by benchmark code in GUI driver 
 
     def runNetwork(self, t, dt):
         sTime = time.clock()
@@ -92,17 +82,15 @@ class WheelAnimat(Animat):
         
     def move(self, trac, t):
         #set each wheel
-        self.motors[0],self.motors[1] = self.net.getMotorData()  #right now only ever 0 or 20
-        trac = .001 #need to change that later
+        self.motors[0],self.motors[1] = self.net.getMotorData()  # motors[] is an array (mutable) but getMotorData returns tuple - could change that to return array
         if self.Eating:
-            self.motors = np.array([[0],[0]])
-            trac = 0       #causes no movement
+            self.motors = np.array([[0],[0]]) # stops it when eating
 
         # rotate body depending on the difference (hopefully small) of two motors along direction of travel
         self.direc = self.direc + math.atan(trac*(self.motors[1]-self.motors[0])/self.radius)
-        self.unwind() #the angle direc could exceed 2*pi and 'wind up'
-        self.determineMotion(trac)
-        self.Energy = self.Energy - self.cMotionEnergy * self.motors.sum(axis=0) - self.kBasalEnergy
+        self.unwind() #the angle direc could exceed 2*pi and 'wind up' ... should test if needed
+        self.determineMotion(trac) # later function computes how much animat moves
+        self.Energy = self.Energy - self.cMotionEnergy * self.motors.sum() - self.kBasalEnergy 
 
     def smell(self, foods):
         smell_loc_A = []
