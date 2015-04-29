@@ -122,16 +122,16 @@ class WheelAnimat(Animat):
 
 
     def gaussian(self, x, mu, sig):
-         return np.exp(-1 * (x - mu)**2. / 2 * sig**2.)
+         return np.exp(-1 * (x - mu)**2 / 2 * sig**2)
 
-    # direction and traction determine motion
+    # direction and traction determine motion -- maybe should check self.direc before calling
     def unwind(self):
         if self.direc > math.pi + .5:
             self.direc = self.direc - 2*math.pi
         if self.direc < -1*math.pi -.5:
             self.direc = self.direc + 2*math.pi
         
-    # direction and traction determine motion
+    # direction, motor neuron activity and traction determine motion ... should fold into move() method
     def determineMotion(self,trac):
         self.posInc = trac * np.mean(self.motors) * np.array([np.cos(self.direc), np.sin(self.direc)])
         self.pos = self.pos + self.posInc
@@ -153,13 +153,13 @@ class WheelAnimat(Animat):
             self.Energy += foods[toEat].getCalories()
             foods[toEat].decrAmt()
         else:
-            self.Eating = 0 #move if not near food
-        #check if hungry
-        if self.Energy <= self.hungerThreshold:
-            self.net.I[self.net.hungerNeurons] = 105  #-65->30 = 95 + 10 = 105
+            self.Eating = 0 # allow to move if not near food
+        #check if hungry ... maybe should check before starting to eat
+        if self.Energy <= self.hungerThreshold: # right now this just stimulates activity in network
+            self.net.I[self.net.hungerNeurons] = 105  # brings it suddenly from -65 (rest) to 30 = 95 + 10 = 105to ensure firing
         return foods
 
-    def getStats(self):
+    def getStats(self): # for GUIDriver's animatStatWindow method; this is not used for evolution
         #stat list = Type,Energy,
         stats = ["Wheel Animat"]
         stats.append(str(self.Energy))
@@ -168,7 +168,7 @@ class WheelAnimat(Animat):
         #add function call to network to get neuron stats
         return stats
 
-    def calcBenchmark(self,bufferedTime,runTime):
+    def calcBenchmark(self,bufferedTime,runTime): # used in GUIDriver to track 
         log = open("Benchmarks.txt","w")
         log.write("Benchmark Log\n")
         neuronNums = self.net.getNeuronNums()
