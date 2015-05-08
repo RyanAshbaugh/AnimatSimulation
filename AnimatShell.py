@@ -45,7 +45,7 @@ class WheelAnimat(Animat):
     def __init__(self,(id,origin,x0,y0,sigma),rad=1):
         Animat.__init__(self,(id,origin,x0,y0,sigma))
         self.radius = rad
-        self.motors = np.array([[0],[0]]) # how fast the motors are running
+        self.motors = np.array([[0],[0]]) # how fast the motors are running ... could be running
         self.cMotionEnergy = 0.01 # coefficient to convert motion into energy expended in calories 
         self.kBasalEnergy = 0.01 # rate of burning energy 'at rest'
         self.benchmark = [] # storage for times determined by benchmark code in GUI driver 
@@ -79,7 +79,7 @@ class WheelAnimat(Animat):
         self.net.loadDynamicState(state[6])
         self.benchmark = state[7]
        
-        
+    # called in order smell, move, eat    
     def move(self, trac, t):
         #set each wheel
         self.motors[0],self.motors[1] = self.net.getMotorData()  # motors[] is an array (mutable) but getMotorData returns tuple - could change that to return array
@@ -89,7 +89,7 @@ class WheelAnimat(Animat):
         # rotate body depending on the difference (hopefully small) of two motors along direction of travel
         self.direc = self.direc + math.atan(trac*(self.motors[1]-self.motors[0])/self.radius)
         self.unwind() #the angle direc could exceed 2*pi and 'wind up' ... should test if needed
-        self.determineMotion(trac) # later function computes how much animat moves
+        self.determineMotion(trac) # later function computes how much animat moves ... could move inline.. trac passed in
         self.Energy = self.Energy - self.cMotionEnergy * self.motors.sum() - self.kBasalEnergy 
 
     def smell(self, foods):
@@ -97,14 +97,14 @@ class WheelAnimat(Animat):
         smell_str_A = []
         smell_loc_B = []
         smell_str_B = []
-        for food in foods:
+        for food in foods: # messy looking because animat doesn't 'know' food locations - belongs to world
             if food.getType() == "A":
                 smell_loc_A.append(food.getPos())
                 smell_str_A.append(food.getSmell())
             if food.getType() == "B":
                 smell_loc_B.append(food.getPos())
                 smell_str_B.append(food.getSmell())
-
+        # compute strength of smells at smell sensor locations
         dir = -(self.direc - math.pi/2)   #figure out the clockwise direction of the animat
         if(dir <= 0): dir += math.pi*2    #bound direction to [0, 2*pi]
         rotMat = np.array([[np.cos(dir), -np.sin(dir)], [np.sin(dir), np.cos(dir)]])  #construct the rotation matrix
@@ -116,9 +116,9 @@ class WheelAnimat(Animat):
         total_smell_A = self.net.sensitivity_A * np.sum(self.gaussian(scipy.spatial.distance.cdist(worldPos_A, smell_loc_A ), 0, 3), axis=1)  #figures out the total smell strength based on the distances (gaussian distribution)
         total_smell_B = self.net.sensitivity_B * np.sum(self.gaussian(scipy.spatial.distance.cdist(worldPos_B, smell_loc_B ), 0, 3), axis=1)  #figures out the total smell strength based on the distances (gaussian distribution)
 
-        self.net.I[self.net.senseNeurons_A] = np.minimum(total_smell_A,100)   #sense neuron drive based on smell
+        self.net.I[self.net.senseNeurons_A] = np.minimum(total_smell_A,100)   #caps it at 100 .. may not be necessary
         self.net.I[self.net.senseNeurons_B] = np.minimum(total_smell_B,100)   #sense neuron drive based on smell
-
+    
 
 
     def gaussian(self, x, mu, sig):
@@ -139,7 +139,7 @@ class WheelAnimat(Animat):
     # 'Eat' if at food    
     def eat(self, foods):
         possibleFoods = []
-        for i,food in enumerate(foods):
+        for i,food in enumerate(foods): # could pass in only at one possible food
             x1,y1 = self.pos
             x2,y2 = food.getPos()
             dist = np.sqrt(np.square(np.abs(x2-x1))+np.square(np.abs(y2-y1)))
@@ -150,12 +150,12 @@ class WheelAnimat(Animat):
         if len(possibleFoods) > 0:
             toEat = possibleFoods[0] #pick first food in list, change maybe to whichever is closer?
             self.Eating = 1
-            self.Energy += foods[toEat].getCalories()
-            foods[toEat].decrAmt()
+            self.Energy += foods[toEat].getCalories()  # amount set in Stimuli class
+            foods[toEat].decrAmt() # set in Stimuli class
         else:
             self.Eating = 0 # allow to move if not near food
         #check if hungry ... maybe should check before starting to eat
-        if self.Energy <= self.hungerThreshold: # right now this just stimulates activity in network
+        if self.Energy <= self.hungerThreshold: # right now this just stimulates activity in network ... SHOULD PUT IN NETWORK
             self.net.I[self.net.hungerNeurons] = 105  # brings it suddenly from -65 (rest) to 30 = 95 + 10 = 105to ensure firing
         return foods
 
