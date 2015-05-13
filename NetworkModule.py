@@ -22,10 +22,10 @@ import SimParam
 class Network:
 
     #kwargs used for evo driver
-     def __init__(self,x0,y0,sigma):
+     def __init__(self,x0,y0,sigma): # mixture of neuron parameters and initializing network numbers
          #some constants/tracking numbers
-         self.FIRED_VALUE = 30
-         self.DT = 1
+         self.FIRED_VALUE = 30 # mV
+         self.DT = 1 # ms
          self.numExcitatory = 0
          self.numInhibitory = 0
          self.numMotor = 0
@@ -33,12 +33,12 @@ class Network:
          self.numSensory_B = 0
          self.numHunger = 0
          self.totalNum = 0
-         self.voltIncr = 30.0     #S matrix contains connection weights too small to be used as voltage,
-         self.kSynapseDecay = 0.7
+         self.voltIncr = 30.0     #multiplier for S matrix connection weights 
+         self.kSynapseDecay = 0.7 # Synaptic conductance after 1 ms
          self.L = 3
          self.K = 5
 
-         if x0 == None:
+         if x0 == None: # if no values are passed in (unusual) then set up some random - may want to remove this
              self.x0 = [[np.random.random_sample()*3.01 - 1.5 for x in xrange(self.K)] for x in xrange(self.L)]
              self.y0 = [[np.random.random_sample()*3.01 - 1.5 for x in xrange(self.K)] for x in xrange(self.L)]
              self.sigma = [[np.random.exponential() for x in xrange(self.K)] for x in xrange(self.L)]
@@ -51,21 +51,21 @@ class Network:
              self.sigma = sigma
 
 
-         #Izhikevich Variables
-         self.v = np.array([], dtype = np.float32)
+         #Izhikevich Variables ... do we need 32-bit numbers? try np.float16?
+         self.v = np.array([], dtype = np.float32) # voltage proxy .
+         self.u = self.b*self.v                 # Set initial values of u at ceiling
          self.a = np.array([], dtype = np.float32)
          self.b = np.array([], dtype = np.float32)
          self.c = np.array([], dtype = np.float32)
          self.d = np.array([], dtype = np.float32)
-         self.S = np.array([[]], dtype = np.float32)
-         self.u=self.b*self.v                 # Initial values of u at ceiling
+         self.S = np.array([[]], dtype = np.float32) # row-major order; S(2,3) is weight from #2 to #3
 
 
          #'Shadow' Variables
          self.fireTogetherCount = np.array([], ndmin = 2, dtype = np.float)
          self.firingCount = np.array([])
          self.recentlyFired = np.array([], dtype = np.float32)
-         self.justFired = np.array([], dtype = np.int_, ndmin = 2)
+         self.justFired = np.array([], dtype = np.int_, ndmin = 2) # this is int64 ... remove _ to make int8 or int16
 
          #'Shadow' Variable assistants
          #self.fireTogetherWindow = np.array([])
@@ -80,20 +80,20 @@ class Network:
          self.hungerNeurons = np.array([],dtype=np.int_)
 
          #These will be dictionaries of Lists eventually for different types of sensory neurons!
-         self.senseNeurons_A = np.array([], dtype=np.int_)
-         self.senseNeuronLocations_A = np.array([],ndmin=2)
-         self.sensitivity_A = np.array([], ndmin = 2)
-         self.senseNeurons_B = np.array([], dtype=np.int_)
+         self.senseNeurons_A = np.array([], dtype=np.int_) # holds neuron objects
+         self.senseNeuronLocations_A = np.array([],ndmin=2) # holds locations on animat
+         self.sensitivity_A = np.array([], ndmin = 2) # sensitivity to smell A: hard-coded to 
+         self.senseNeurons_B = np.array([], dtype=np.int_) 
          self.senseNeuronLocations_B = np.array([],ndmin=2)
          self.sensitivity_B = np.array([], ndmin = 2)
 
 
      #maybe add to OO... then let the network rebuild..?
-     def add_neuron(self, type, pos, sensitivity = 50000):
+     def add_neuron(self, type, pos, sensitivity = 50000): # change 'type' to 'n_type'
          if type == 'inhibitory':
              loc = self.numInhibitory
-             self._neurons.insert(loc, InhibitoryNeuron(pos[0], pos[1], 0))
-             self.inhibitoryNeurons = np.append(self.inhibitoryNeurons, loc)
+             self._neurons.insert(loc, InhibitoryNeuron(pos[0], pos[1], 0)) # insert because mutable
+             self.inhibitoryNeurons = np.append(self.inhibitoryNeurons, loc) # assigned because np.append doesn't alter its argument
              self.a = np.insert(self.a, loc, 0.02)
              self.b = np.insert(self.b, loc, 0.2)
              self.c = np.insert(self.c, loc, -65)
@@ -101,7 +101,7 @@ class Network:
              self.v = np.insert(self.v, loc, -65)
              self.numInhibitory += 1
 
-             self.excitatoryNeurons += 1 # used to keep track of locations of neuron types for GUIdriver etc
+             self.excitatoryNeurons += 1 # bumps up all indices - to keep track of locations of neuron types for GUIdriver etc
              self.motorNeurons += 1
              self.senseNeurons_A += 1
              self.senseNeurons_B += 1
@@ -209,7 +209,7 @@ class Network:
          #self.firingCount_decay = np.array([])
          #self.fireTogetherCount_decay = np.array([])
 
-         self.u=self.b*self.v
+         self.u=self.b*self.v # should be here; makes earlier one redundant
 
      def generateNeurons(self):
          #Generate neurons around the circle
@@ -244,7 +244,7 @@ class Network:
                 if lVal < 0.0: lVal = 0.0
                 rr.append(rVal)
                 ll.append(lVal)
-            self._neurons[index].setRL(rr,ll) # setRL method in neuronModule.py
+            self._neurons[index].setRL(rr,ll) # adds the vectors rr, ll to neuron using setRL method in neuronModule.py
 
          #Set up ligand and receptor lists for each motor neuron and hunger neuron
          for index in self.hungerNeurons:
@@ -255,7 +255,7 @@ class Network:
 
          rr = [0 for i in xrange(5)]
          ll = [0 for i in xrange(5)]
-         ll[3] = 1
+         ll[3] = 1 # needs to be changed for L/R difference - CHANGED
          self._neurons[self.motorNeurons[0]].setRL(rr,ll)
          self._neurons[self.motorNeurons[1]].setRL(rr,ll)
 
@@ -270,10 +270,10 @@ class Network:
                  connectionWeight = np.exp(A* W) / (B + np.exp(A*W)) 
                  ### bring in multiplier from runNetwork
                  if connectionWeight <= 1.0/20.0: connectionWeight = 0
-                 self.connectNeurons(n1,n2,connectionWeight)
+                 self.connectNeurons(n1,n2,connectionWeight) # CHANGE
 
          # initialize I
-         self.I = 2*np.ones( (self.totalNum), dtype = np.float32 )
+         self.I = 2*np.ones( (self.totalNum), dtype = np.float32 ) # should be in initialization
 
 
 
@@ -342,13 +342,13 @@ class Network:
          self.u=self.u+self.a*(self.b*self.v - self.u)
 
 
-     #uses voltages of firing motorNeurons to return new motor data to determine wheel (called in animatMovement)
-     # NEEDS attention
+     #uses voltages of firing motorNeurons to return new motor data to AnimatShell to determine wheel (called in animatMovement)
+     # NEEDS attention to operate smoothly
      def getMotorData(self):
 
          newM1 = 0 if(self.v[self.motorNeurons[0]] <= 30) else (self.v[self.motorNeurons[0]])/30 + 30
          newM2 = 0 if(self.v[self.motorNeurons[1]] <= 30) else (self.v[self.motorNeurons[0]])/30 + 30
-         return newM1,newM2
+         return newM1,newM2  # 
 
      def getTotalNeuronNum(self):
          return self.totalNum
