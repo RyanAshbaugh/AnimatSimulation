@@ -257,6 +257,8 @@ class Network:
          ll = [0 for i in xrange(5)]
          ll[3] = 1 # needs to be changed for L/R difference - CHANGED
          self._neurons[self.motorNeurons[0]].setRL(rr,ll)
+         ll[3] = 0
+         ll[4] = 1
          self._neurons[self.motorNeurons[1]].setRL(rr,ll)
 
 
@@ -270,7 +272,7 @@ class Network:
                  connectionWeight = np.exp(A* W) / (B + np.exp(A*W)) 
                  ### bring in multiplier from runNetwork
                  if connectionWeight <= 1.0/20.0: connectionWeight = 0
-                 self.connectNeurons(n1,n2,connectionWeight) # CHANGE
+                 self.S[n1,n2] = connectionWeight
 
          # initialize I
          self.I = 2*np.ones( (self.totalNum), dtype = np.float32 ) # should be in initialization
@@ -305,9 +307,6 @@ class Network:
          except IndexError:
              pass #not set yet
 
-
-     def connectNeurons(self, n1, n2, dV = 100): # put directly into connectNetwork
-         self.S[n1, n2] = dV
 
     def get_neurons_firing(self): # used in GUI driver to change colors
          return (self.v >= self.FIRED_VALUE).nonzero()
