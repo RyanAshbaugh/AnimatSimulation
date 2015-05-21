@@ -16,16 +16,16 @@ except:
 import Tkinter as tk
 from PIL import Image
 from PIL import ImageTk
-from Graph import Graph
+from Graph import Graph # Steven wrote this to wrap Tk functions for ease of use
 import cPickle
-import matplotlib
-matplotlib.use('TkAgg')
+import matplotlib # only used for summary statistics graphs
+matplotlib.use('TkAgg') # we use Tk back end
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
 import time
-from TabBox import TabBox
-from VideoBar import VideoBar
+from TabBox import TabBox # SH wrote this
+from VideoBar import VideoBar # SH wrote this for multiple animats to switch neuron graphs
 import tkFileDialog
 import collections
 import SimParam
@@ -37,25 +37,25 @@ class GUIDriver:
     def __init__(self,master,devWin,simParams):
         self.sP = simParams
         #some parameters
-        self.paused = False                     #paused?
-        self.simRunning = True
-        self.lastTime = 0                       #the last time on the clock
-        self.sim_msps = 0                       #how many simulated milliseconds pass per second: i.e., a value of 1000 means real-time
+        self.paused = False                     # whether simulation playback is paused
+        self.simRunning = True                  # whether simulation is running - so buffering to GUI
+        self.lastTime = 0                       # the last time on the clock
+        self.sim_msps = 0                       # how many simulated milliseconds pass per second in display: i.e., a value of 1000 means real-time - useful for animat moving, but too fast to see neural activity
         self.dis_t = 1                          #the time being currently displayed by the GUI
         self.buff_t = 0                         #the time buffered by the Simulation Engine
-        self.writeInterval = 25                 #determines the interval between writes (in ms)
-        self.simHistory = {}                    #dictionary of time: dynamic world state
-        self.tracked_data = collections.defaultdict(lambda: collections.defaultdict(lambda: collections.OrderedDict()))
+        self.writeInterval = 25                 # sets the interval between write states (in simulated ms); 
+        self.simHistory = {}                    # dictionary of time: dynamic world state
+        self.tracked_data = collections.defaultdict(lambda: collections.defaultdict(lambda: collections.OrderedDict())) # not clear what this is; SH
         self.TRACK_NEURAL_FIRINGS = "Neural Firings"
         self.TRACK_ENERGY = "Energy"
         self.TRACK_POS = "Position"
-        self.TRACK_LFP = "LFP"
+        self.TRACK_LFP = "LFP" # probably should give this another name
         self.tracked_types = []
         self.simEngine = SimulationEngine()     #constructs a Simulation Engine
         self.world = 0                          #placeholder for the World currently being displayed
-        #self.parameters = params                #[AnimNum,foodNum,WorldSize]
-        #self.AnimatParams = animParams          #[type,origin,cal,inhib,excit]
-        self.devWin = devWin
+        
+        
+        self.devWin = devWin              # development window is parent; use this to set up parameters
 
         #some general-purpose colors
         self.colorWhite = "#ffffff"
@@ -67,12 +67,12 @@ class GUIDriver:
         self.colorGreen = "#00ff00"
 
         #setting up Tk window
-        self.root = master
+        self.root = master          # window passed in
         self.root.title("Animat Simulation")
         self.canvas = tk.Canvas(self.root, width=1280, height=720)
         self.canvas.pack()
 
-        #set up file options
+        #set up file options to save simulations
         self.file_opt = options = {}
         options['defaultextension'] = '.sim'
         options['filetypes'] = [('all files', '.*'), ('text files', '.txt'), ('Simulation Files', '.sim')]
@@ -140,7 +140,7 @@ class GUIDriver:
         self.neuron_box = TabBox(self.root, [600, 50, 1000, 475])
         self.videoBar = VideoBar(self.canvas, (100, 515, 500, 525), (0, 15000), self.timeClicked)
 
-        #some images--will probably eventually go in respective classes (static state)
+        #some images--will probably eventually go in respective classes (static state) - can remove 
         self.animatImage = Image.open("roomba.png")
         self.aImage = ImageTk.PhotoImage(self.animatImage)
         self.foodImage = Image.open("beer.png")
@@ -171,7 +171,7 @@ class GUIDriver:
         self.simCtrlButton = tk.Button(self.root, command=self.simCtrl, text="Stop Simulation",bg='red')
         self.simCtrlButton.place(x=320,y=545)
 
-
+         # Buttons using images
         # self.playButton = tk.Button(self.root, command = self.play, text="Play", relief='sunken')
         # self.playButton.place(x = 100,y=545)
         # self.pauseButton = tk.Button(self.root, command = self.pause, text="Pause", relief='raised')
@@ -232,9 +232,9 @@ class GUIDriver:
         self.simEngine.startNewSim(self.sP)                            #starts a new simulation
         self.world = self.simEngine.staticWorld
         self.simEngine.setWriteInterval(self.writeInterval)     #sets the write interval of the simulator
-        self.worldGraph.set_numBounds(self.simEngine.staticWorld.numBounds)
+        self.worldGraph.set_numBounds(self.simEngine.staticWorld.numBounds) # bounds of box animat is contained
         self.makeStatMenu(3)
-        self.root.after(0, self.refreshScreen)                  #adds task to refresh screen information
+        self.root.after(0, self.refreshScreen)                  #adds task to refresh screen information - starts animation
         self.lastTime = time.clock()                            #clocks the start of the simulation
         #self.makeStatMenu(3)                                    #right now hardcoded to 3 food items
 
