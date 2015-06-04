@@ -8,11 +8,11 @@ so task distribution needs to handled differently, no need for cluster driver
 '''
 import clusterDriver as cd
 import spur # SSH client
-import pp
+import pp # Parallel Python
 import os
 import numpy as np
 import random
-import json # for saving objects ... may not be used
+#import json # for saving objects ... may not be used
 import SimParam
 import operator
 import math
@@ -22,8 +22,8 @@ import cPickle
 class EvoDriver():
 
     def __init__(self, usr="usrname", pw="pw"):
-
-        #Simulation Variables
+        # this is largely a wrapper for calling individual animat runs, to help catch crashes on individual nodes
+        #Simulation Variables - these are global variables
         self.IDcntr = 1          #keeps track so each animat gets unique id number
         self.worlds = []         #list of world configurations
         self.aType = "Wheel Animat"
@@ -46,8 +46,8 @@ class EvoDriver():
         ## NOTE when adding metrics to toTrack, make sure they are included in Simulation.filterResults
         self.toTrack = ["Energy","FoodsEaten","FindsFood","NetworkDensity","FiringRate","TotalMove"]  #names of metrics to track - keys to dictionary
         self.nodeP2Ps = [("10.2.1." + str(i) + ":60000") for i in xrange(2,12)]     #Cluster-specific P2P (peer-to-peer) address for each node on cluster (now dogwood) ...NB must change this for other clusters
-        self.js = pp.Server(ncpus=0,ppservers=tuple(self.nodeP2Ps[0:8])) # prevents PP from using nodes on job server 
-        self.L = 3                #number of parameter pairs used for constructing network connection weights
+        self.js = pp.Server(ncpus=0,ppservers=tuple(self.nodeP2Ps)) # prevents PP from using nodes on job server - can limit to [0:8] if higher ones crash
+        self.L = 3                # global variable: number of parameter pairs used for constructing network connection weights
         self.K = 5                # number of location parameters for each parameter
         self.animats = []         #list of simParams
         self.results = []         #all results returned from Simulation, used to rank Animats on performance
@@ -56,7 +56,7 @@ class EvoDriver():
         self.animatHistory = []   #holds animat parameter configuration from each generation
 
         ## Setup
-        input = raw_input("Load data from file? (y/n): ")
+        input = raw_input("Load data from file? (y/n): ") # load results from previous runs? in case of crash, saves values
         if input == "y":
             lastGenNum = self.loadGen()                         #load data from save file
             self.run(genNum=lastGenNum+1)
@@ -74,24 +74,24 @@ class EvoDriver():
 
     #runs simulations for each generation
     def run(self,genNum=0):
-        for g in xrange(genNum,self.cycleNum):
+        for g in xrange(genNum,self.cycleNum): # loop specifies generations
             print "Starting generation " + str(g+1) + " of " + str(self.cycleNum)
-            babies = self.mutate(self.animats[-self.reRankNum:]) #take top ranked animats and mutate
+            babies = self.mutate(self.animats[-self.reRankNum:]) #take (reRankNum) top ranked animats (weakest to best) and mutate to make (100) new animats
             self.randomizeWorlds(self.animats)                   #make sure random worlds change each generation
-            self.animats = self.animats + babies
-            self.results = self.runSims(self.animats)            #run all animats
+            self.animats = self.animats + babies                 # append animats
+            self.results = self.runSims(self.animats)  # NB see below          # run all animats (orchestrated by PP)
             self.resultsHistory.append(self.results)             #self.results changes as animats are sorted, so keep store for later analysis
-            self.rankAnimats()                                   #reRank all animats
+            self.rankAnimats()                                   #reRank all animats (from weakest to strongest)
             self.animats = self.animats[-self.maxAnimats:]       #keep only <self.maxAnimats> number of animats
-            self.animatHistory.append(self.animats)              #save animats
+            self.animatHistory.append(self.animats)              #save animat parameters
             self.saveGen(g)                                      #save in case of crash/connection break
-
-        #Generates initial animat parameters
+            # NB this runs all animats again each generation. We should change this to run only new ones, in greater detail but check consistency 
+        #Generates initial and mutated animat parameters
     def generateParams(self,list,size,x0=-1,y0=-1,sigma=-1):
         print "Generating Animats\n"
         for i in xrange(size):
-            sP = SimParam.SimParam()
-            for j,world in enumerate(self.worlds): sP.setWorld(j+1,world[0],world[1],world[2],world[3])
+            sP = SimParam.SimParam() # calls wrapper to generate world parameters
+            for j,world in enumerate(self.worlds): sP.setWorld(j+1,world[0],world[1],world[2],world[3]) # enumerate returns tuples of index, value pairs
             sP.setWorld(4,1,15,20,[(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(15)])
             sP.setWorld(5,1,15,20,[(random.random()*20 - 20.0/2., random.random()*20 - 20.0/2.) for i in xrange(15)])
             sP.setAnimParams(1,self.IDcntr,self.origin)
