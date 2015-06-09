@@ -115,10 +115,11 @@ class EvoDriver():
         #calculate score based on each metric
         for metric in self.toTrack:
             print metric
-            #build list of all results for this metric
-            results = [(id,result[metric]) for id,result in self.results]
+            #build list of all results for this metric ... this is confusing 
+            # self.results a list of dictionaries; each the results for each animat
+            results = [(id,result[metric]) for id,result in self.results] # now self.results is a list tuples
             #use simulation results to calculate max,min,mean,std so that evo performance can be tracked
-            maxResult = max(results, key= lambda x: x[1])[1]
+            maxResult = max(results, key= lambda x: x[1])[1] # applies to second entry (index 1)
             minResult = min(results, key= lambda x: x[1])[1]
             mean = np.mean(results,axis=0)[1]
             sd = np.std(results,axis=0)[1]
@@ -129,7 +130,7 @@ class EvoDriver():
                         scores[id] += ((result-mean)/sd)*(-1.0)  #These metrics should dock points
                     else:
                         scores[id] += (result-mean)/sd           #score is sum of z scores for all metrics
-                except KeyError:                                 #KeyError when score updated for first time, so catch and set
+                except KeyError:                                 # KeyError when score updated for first time, so catch and set
                     if (metric == "NetworkDensity") or (metric == "FiringRate"):
                         scores[id] = ((result-mean)/sd)*(-1.0)   #These metrics should dock points
                     else:
@@ -141,9 +142,10 @@ class EvoDriver():
 
 
 
-    #takes dictionary of scores and sorts animat list accordingly
+    #takes dictionary of scores and sorts animat list accordingly ... dictionaries are not ordered
+    # May want to re-write more simply
     def sortByScores(self,scores):
-        idOrder = sorted(scores.items(), key=operator.itemgetter(1)) #return ids of animats in sorted order
+        idOrder = sorted(scores.items(), key=operator.itemgetter(1)) # use built-in to return ids of animats in sorted order; key= selects scores
         newAnim = []
         for id in idOrder:
             for sP in self.animats:
@@ -159,15 +161,15 @@ class EvoDriver():
         print "Mutating"
         #Random mutation for first 50
         randMut = []
-        self.generateParams(randMut,self.newGenSize/2)
+        self.generateParams(randMut,self.newGenSize/2) # generate totally new random parameters for ... MUST BE CHANGED!
         #Random recombination for last 50
         #Combines aa,bb
         recomb = []
         for i in xrange(self.newGenSize/2):
             r1 = random.randint(0,len(animats)-1)
             r2 = random.randint(0,len(animats)-1)
-            newx0 = self.animats[r1].getX0(1)   #hardcoded for 1 animat per sim
-            newy0 = self.animats[r2].getY0(1)   #hardcoded for 1 animat per sim
+            newx0 = self.animats[r1].getX0(1)   #pick all x0 from animat r1 ... this should be changed
+            newy0 = self.animats[r2].getY0(1)   #
             newsigma = self.animats[r2].getSigma(1)
             self.generateParams(recomb,1,newx0,newy0,newsigma)
         return randMut+recomb
@@ -176,19 +178,20 @@ class EvoDriver():
     def runSims(self,animats):
         print "Running Simulations"
         results = []
-        simsPerNode = len(animats)/self.nodeNum              #evenly distribute number of simulations on each node
-        extra = len(animats) % self.nodeNum
+        simsPerNode = len(animats)/self.nodeNum # truncated in Python 2.7 ...evenly distribute number of simulations on each node
+        extra = len(animats) % self.nodeNum # how many left over ... NB we'll adjust this so no extras
         nodeDrivers = []
-        for i in xrange(self.nodeNum):                          #need to create driver loaded with animats for each node
-            temp = animats[i*simsPerNode:(i+1)*simsPerNode]#extract animats to run on current driver
+        # distribute animat simulations to each node
+        for i in xrange(self.nodeNum):          # create driver loaded with animats for each node
+            temp = animats[i*simsPerNode : (i+1)*simsPerNode] # select a range of animats to run on current driver
             nodeDrivers.append(cd.EvoClusterDriver(i+1,temp,self.toTrack))
         if not(extra == 0):
             temp = animats[-extra:]                        #extract remaining animats
-            nodeDrivers.append(cd.EvoClusterDriver(self.nodeNum+1,temp,self.toTrack))
-        #js = pp.Server(ncpus=0,ppservers=tuple(self.nodeP2Ps[0:8]),restart=True)  #connect to each node
+            nodeDrivers.append(cd.EvoClusterDriver(self.nodeNum+1,temp,self.toTrack)) # this pushes all the extras onto one node
         jobs = [self.js.submit(node.startNode,modules=("clusterDriver","pp","SimParam")) for node in nodeDrivers] #send each driver to node
+        # create list of references to nodes running jobs; arguments are minimal list of modules that are needed - NB MSU HPC may require more modules explicitly!!
         for job in jobs:   #execute each job
-            results += job()            #function output not saved, because callback should fill self.results
+            results += job()  # append results from each node; function output not saved, because callback should fill self.results
         self.js.wait()
 
         return results
