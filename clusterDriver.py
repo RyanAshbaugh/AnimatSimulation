@@ -10,7 +10,7 @@ import SimParam
 import random
 
 
-class ClusterDriver():
+class ClusterDriver(): # class to run single sims could eliminate this class ?
 
     def __init__(self,id,parameters,animatParams,writeInt,writeFiles=True,time=1000):
         self.writeInt = writeInt
@@ -44,19 +44,19 @@ class EvoClusterDriver():
         self.results = []  #holder for results of
         self.metrics = metrics   #list of metrics to track
         self.simParams = simParams  #list of simParam objects for each simulation
-        self.initializeSims()
+        self.initializeSims() # creates simulation objects
 
-    def initializeSims(self):
+    def initializeSims(self): # creates simulation objects
         for i,sP in enumerate(self.simParams):
             self.sims.append(Simulation(self.id,i,sP,60000,writeInterval=25,evo=True))
 
-    def startNode(self):
+    def startNode(self): # runs on a local node and sets up PP servers on each CPU
         print "Node " + str(self.id) + " starting"
-        js = pp.Server()    #create local server for SMP execution
+        js = pp.Server()    # create local server for SMP execution; detects number of CPUs on node
         jobs = [js.submit(sim.startSimulation,args=(self.metrics,),modules=("clusterDriver","SimParam")) for sim in self.sims] #submit all jobs to server
         #NOTE in below, callback in Simulation object should fill results, not the function call
-        for job in jobs: self.results.append(job())   #execute all jobs,
-        js.wait()
+        for job in jobs: self.results.append(job())   #execute all jobs; stores results; could use call-back object; this
+        js.wait() # until all jobs have finished ... see documentation
         print "Node " + str(self.id) + " finished"
         #js.print_stats()
         js.destroy()
@@ -66,46 +66,46 @@ class EvoClusterDriver():
 # Simulation object
 class Simulation():
 
-    def __init__(self,clusterId,simId,simParam,runTime,writeInterval=25,evo=False,writeFiles=True):
+    def __init__(self,clusterId,simId,simParam,runTime,writeInterval=25,evo=False,writeFiles=True): # runTime in virtual millisec
         self.writeFiles = writeFiles
-        self.evo = evo
+        self.evo = evo # may not be used much
         self.simEngine = clusterSimEngine.clusterSimEngine()
         self.sP = simParam
         self.runTime = runTime                  # how many "cycles" simEngine will run (time = ms?)
         self.writeInterval = writeInterval      # how often simEngine will save state to buffer
-        self.logFile = 0                        #logfile for state data
+        self.logFile = 0                        # logfile for state data
         self.lastLogged = -1                    # keeps track of last state written to file
         self.simHistory = []
-        self.id = simId
-        self.clusterId = clusterId
+        self.id = simId # simulation ID
+        self.clusterId = clusterId # ID of node this set of sims is running on
 
 
     def startSimulation(self,metrics):
-        if (not self.evo) : self.printStartupInfo()
+        if (not self.evo) : self.printStartupInfo() # for debugging 
         results = []
-        for id in xrange(1,self.sP.getWorldNum()+1):
+        for id in xrange(1,self.sP.getWorldNum()+1): # running several simulated worlds for this animat
             self.sP.worldToRun = id
             #set up simEngine
             self.simEngine.setWriteInterval(self.writeInterval)
             #print "Sim " + str(self.id) + " starting"
-            completed = self.simEngine.initializeEngine(self.sP,self.runTime)#pass world info and animat info to simEngine
-            self.simHistory = self.simEngine.getResults()
-            results.append(self.filterResults(metrics))
+            completed = self.simEngine.initializeEngine(self.sP,self.runTime) # initialize & run; pass world info and animat info to simEngine
+            self.simHistory = self.simEngine.getResults() 
+            results.append(self.filterResults(metrics)) # can change which metrics are selected ... may be simplified?
 
-        return [self.sP.getID(1),self.avgResults(results)]
+        return [self.sP.getID(1),self.avgResults(results)] # match ID of animat parameters with results
 
 
-    def avgResults(self,results):
-        newR = {}
+    def avgResults(self,results): # average results from each world
+        newR = {} # dictionary to store results
         for result in results:
             for metric,val in result.iteritems():
                 try: newR[metric] = newR[metric] + val
-                except KeyError: newR[metric] = val
+                except KeyError: newR[metric] = val # to set first entry
         for metric,val in newR.iteritems():newR[metric] = newR[metric]/float(len(results))
         return newR
 
     #results are scores out of 1000
-    def filterResults(self,metrics):
+    def filterResults(self,metrics): # calls computation of metrics
         temp = {}        #dictionary of results
         if "Energy" in metrics: temp["Energy"] = self.getNrg()
         if "FindsFood" in metrics: temp["FindsFood"] = self.findsFood()
@@ -130,7 +130,7 @@ class Simulation():
         score = 0.0
         initNrg = self.simHistory[0][1].getEnergy()       #get initial energy from first state
         prevDist = self.minFoodDist(self.simHistory[0][1])#find initial distance
-        for t,s in self.simHistory[1:]:
+        for t,s in self.simHistory[1:]: # coordinates of motion
             if s.getEnergy() < (.5*initNrg):
                 newDist = self.minFoodDist(s)
                 if newDist < prevDist: score += np.abs(prevDist-newDist)
